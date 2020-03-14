@@ -1,7 +1,7 @@
 
 # OSH 大作业 - Chital
 
-![logo](./assets/logoChital.jpg)
+![logo](assets/logoChital.png)
 
 
 
