@@ -7,6 +7,6 @@
 ## 小组成员
 
 * 丁垣天 dnailzb@outlook.com
-* 叶之帆
+* 叶之帆 rabbitforyou@foxmail.com
 * 何灏迪
-* 郑在一
+* 郑在一 donpanica@outlook.com
