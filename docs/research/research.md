@@ -59,15 +59,15 @@ Docker是一个基于go语言编写的开源的应用容器引擎。通过使用
 
 作为容器技术，Docker相比传统的虚拟化技术具有以下优点：
 
-- 更高效的利用系统资源：由于容器不需要进行硬件虚拟以及运行完整操作系统等额外开销，Docker 对系统资源的利用率更高。无论是应用执行速度、内存损耗或者文件存储速度，都要比传统虚拟机技术更高效。因此，相比虚拟机技术，一个相同配置的主机，往往可以运行更多数量的应用。
+- **更高效的利用系统资源**：由于容器不需要进行硬件虚拟以及运行完整操作系统等额外开销，Docker 对系统资源的利用率更高。无论是应用执行速度、内存损耗或者文件存储速度，都要比传统虚拟机技术更高效。因此，相比虚拟机技术，一个相同配置的主机，往往可以运行更多数量的应用。
 
-- 更快速的启动时间：传统的虚拟机技术启动应用服务往往需要数分钟，而Docker 容器应用，由于直接运行于宿主内核，无需启动完整的操作系统，因此可以做到秒级、甚至毫秒级的启动时间。大大的节约了开发、测试、部署的时间。
+- **更快速的启动时间**：传统的虚拟机技术启动应用服务往往需要数分钟，而Docker 容器应用，由于直接运行于宿主内核，无需启动完整的操作系统，因此可以做到秒级、甚至毫秒级的启动时间。大大的节约了开发、测试、部署的时间。
 
-- 一致的运行环境：开发过程中一个常见的问题是环境一致性问题。由于开发环境、测试环境、生产环境不一致，导致有些bug 并未在开发过程中被发现。而Docker 的镜像提供了除内核外完整的运行时环境，确保了应用运行环境一致性，从而不会再出现一段代码在不同机器上运行结果不同的问题。
+- **一致的运行环境**：开发过程中一个常见的问题是环境一致性问题。由于开发环境、测试环境、生产环境不一致，导致有些bug 并未在开发过程中被发现。而Docker 的镜像提供了除内核外完整的运行时环境，确保了应用运行环境一致性，从而不会再出现一段代码在不同机器上运行结果不同的问题。
 
-- 持续交付和部署：使用Docker 可以通过定制应用镜像来实现持续集成、持续交付、部署。开发人员可以通过Dockerfile 来进行镜像构建，并结合持续集成(Continuous Integration) 系统进行集成测试，而运维人员则可以直接在生产环境中快速部署该镜像，甚至结合持续部署(Continuous Delivery/Deployment) 系统进行自动部署。
+- **持续交付和部署**：使用Docker 可以通过定制应用镜像来实现持续集成、持续交付、部署。开发人员可以通过Dockerfile 来进行镜像构建，并结合持续集成(Continuous Integration) 系统进行集成测试，而运维人员则可以直接在生产环境中快速部署该镜像，甚至结合持续部署(Continuous Delivery/Deployment) 系统进行自动部署。
 
-- 更轻松的迁移：Docker 使用的分层存储以及镜像的技术，使得应用重复部分的复用更为容易，也使得应用的维护更新更加简单，基于基础镜像进一步扩展镜像也变得非常简单。此外，Docker 团队同各个开源项目团队一起维护了一大批高质量的官方镜像，既可以直接在生产环境使用，又可以作为基础进一步定制，大大的降低了应用服务的镜像制作成本。使用Dockerfile 使镜像构建透明化，不仅仅开发团队可以理解应用运行环境，也方便运维团队理解应用运行所需条件，帮助更好的生产环境中部署该镜像。
+- **更轻松的迁移**：Docker 使用的分层存储以及镜像的技术，使得应用重复部分的复用更为容易，也使得应用的维护更新更加简单，基于基础镜像进一步扩展镜像也变得非常简单。此外，Docker 团队同各个开源项目团队一起维护了一大批高质量的官方镜像，既可以直接在生产环境使用，又可以作为基础进一步定制，大大的降低了应用服务的镜像制作成本。使用Dockerfile 使镜像构建透明化，不仅仅开发团队可以理解应用运行环境，也方便运维团队理解应用运行所需条件，帮助更好的生产环境中部署该镜像。
 
 #### Docker中的基本概念
 
@@ -88,33 +88,33 @@ Docker是一个基于go语言编写的开源的应用容器引擎。通过使用
 
 ##### 启动与退出
 
-- 启动Docker `systemctl start docker`
+- **启动Docker** `systemctl start docker`
 
-- 停止Docker `systemctl stop docker`
+- **停止Docker** `systemctl stop docker`
 
-- 重启Docker `systemctl restart docker`
+- **重启Docker** `systemctl restart docker`
 
 ##### 镜像相关操作
 
-- 列出所有镜像 `docker images`
+- **列出所有镜像**`docker images`
 
-- 搜索镜像 `docker search [IMAGE]`
+- **搜索镜像** `docker search [IMAGE]`
 
-- 拉取镜像 `docker pull [OPTIONS] NAME [:TAG]`
+- **拉取镜像** `docker pull [OPTIONS] NAME [:TAG]`
 
-- 推送镜像 `docker push NAME [:TAG]`
+- **推送镜像** `docker push NAME [:TAG]`
 
-- 创建镜像 `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
+- **创建镜像** `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
 
 ##### 容器相关操作
 
-- 启动容器 `docker run IMAGE_NAME [COMMAND] [ARG…]`
+- **启动容器** `docker run IMAGE_NAME [COMMAND] [ARG…]`
 
-- 列出容器 `docker ps`
+- **列出容器** `docker ps`
 
-- 查看容器 `docker inspect name | id`
+- **查看容器** `docker inspect name | id`
 
-- 重启停止的容器 `docker start [-i] 容器名`
+- **重启停止的容器** `docker start [-i] 容器名`
 
 ### Kubernetes
 
@@ -122,21 +122,21 @@ Docker是一个基于go语言编写的开源的应用容器引擎。通过使用
 
 Kubernetes为支持自动化部署、大规模可伸缩、应用容器化管理。其具有以下一些特性：
 
-- 自动包装 根据资源需求和其他约束自动放置容器，同时不牺牲可用性。混合关键和尽力而为的工作负载，以提高利用率并节省更多资源。
+- **自动包装** 根据资源需求和其他约束自动放置容器，同时不牺牲可用性。混合关键和尽力而为的工作负载，以提高利用率并节省更多资源。
 
-- 自愈 在节点死亡时重新启动失败的容器，替换和重新安排容器，杀死不响应用户定义的运行状况检查的容器，并且在它们准备好服务之前不会将它们通告给客户端。
+- **自愈** 在节点死亡时重新启动失败的容器，替换和重新安排容器，杀死不响应用户定义的运行状况检查的容器，并且在它们准备好服务之前不会将它们通告给客户端。
 
-- 水平缩放 使用简单的命令，UI或基于CPU使用情况自动扩展和缩小应用程序。
+- **水平缩放** 使用简单的命令，UI或基于CPU使用情况自动扩展和缩小应用程序。
 
-- 服务发现和负载平衡 无需修改应用程序即可使用不熟悉的服务发现机制。Kubernetes为容器提供了自己的IP地址和一个DNS名称，并且可以在它们之间进行负载平衡。
+- **服务发现和负载平衡** 无需修改应用程序即可使用不熟悉的服务发现机制。Kubernetes为容器提供了自己的IP地址和一个DNS名称，并且可以在它们之间进行负载平衡。
 
-- 自动部署和回滚 Kubernetes逐步推出对您的应用程序或其配置的更改，同时监控应用程序运行状况以确保它不会同时终止您的所有实例。如果出现问题，Kubernetes支持回滚更改。
+- **自动部署和回滚** Kubernetes逐步推出对您的应用程序或其配置的更改，同时监控应用程序运行状况以确保它不会同时终止您的所有实例。如果出现问题，Kubernetes支持回滚更改。
 
-- 秘密和配置管理 部署和更新机密和应用程序配置，无需重建映像，也不会在堆栈配置中暴露机密。
+- **秘密和配置管理** 部署和更新机密和应用程序配置，无需重建映像，也不会在堆栈配置中暴露机密。
 
-- 存储编排 自动安装选择的存储系统，包括本地存储，公共云提供商（如GCP或AWS），网络存储系统（如NFS，iSCSI，Gluster，Ceph，Cinder或Flocker）等。
+- **存储编排** 自动安装选择的存储系统，包括本地存储，公共云提供商（如GCP或AWS），网络存储系统（如NFS，iSCSI，Gluster，Ceph，Cinder或Flocker）等。
 
-- 批量执行 除服务外，Kubernetes还可以管理批处理和CI工作负载，如果需要，可以替换失败的容器。
+- **批量执行** 除服务外，Kubernetes还可以管理批处理和CI工作负载，如果需要，可以替换失败的容器。
 
 #### Kubernetes核心概念
 
@@ -158,13 +158,13 @@ Namespace被用于进行一个集群中的逻辑隔离，包括鉴权、资源�
 
 Kubernetes采用Master-Nodes架构，在其中创建的应用通常都在Nodes上运行，Master节点上主要负责进行资源的调度。其中包括：
 
-- etcd 主要用于存放集群的状态。一般把所有的集群信息都存放到etcd当中，etcd不属于Kubernetes的某一个部分，而是单独集群部署的。
+- **etcd** 主要用于存放集群的状态。一般把所有的集群信息都存放到etcd当中，etcd不属于Kubernetes的某一个部分，而是单独集群部署的。
 
-- API Server 提供操作资源的唯一入口。认证、授权、访问控制、注册或者发现等操作都是通过API Server来完成的。
+- **API Server** 提供操作资源的唯一入口。认证、授权、访问控制、注册或者发现等操作都是通过API Server来完成的。
 
-- Controller Manager 负责维护集群的状态，例如Pod的故障检测、Pod的自动扩展、滚动更新等。
+- **Controller Manager** 负责维护集群的状态，例如Pod的故障检测、Pod的自动扩展、滚动更新等。
 
-- Scheduler 负责整个集群的资源调度，按照默认或者指定的调度策略将Pod调度到符合要求的Node节点上运行。
+- **Scheduler** 负责整个集群的资源调度，按照默认或者指定的调度策略将Pod调度到符合要求的Node节点上运行。
 
 #### Kubernetes的优缺点
 
@@ -209,8 +209,18 @@ https://github.com/proot-me/proot
 
 ## 参考文献
 
-Docker——入门实战 https://blog.csdn.net/bskfnvjtlyzmv867/article/details/81044217
+[Docker——入门实战](https://blog.csdn.net/bskfnvjtlyzmv867/article/details/81044217)
 
-Docker安装以及原理详解 https://blog.csdn.net/linxiyimeng007/article/details/81080223
+[Docker安装以及原理详解](https://blog.csdn.net/linxiyimeng007/article/details/81080223)
 
-虚拟化的层次与机制 https://blog.csdn.net/mayp1/article/details/51296682
+[虚拟化的层次与机制](https://blog.csdn.net/mayp1/article/details/51296682)
+
+[Kubernetes综述](https://blog.csdn.net/qq_24095055/article/details/97624900)
+
+[Kubernetes认识](https://blog.csdn.net/inthat/article/details/83055531)
+
+[Kubernetes核心组件](https://blog.csdn.net/weixin_42438967/article/details/104580478)
+
+[Kubernetes核心组件篇 (一) : Kubernetes核心组件组成](https://blog.csdn.net/BearStarX/article/details/104915170)
+
+[Kubernetes](https://blog.csdn.net/liuj2511981/article/details/80442394)
