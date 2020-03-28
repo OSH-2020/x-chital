@@ -204,7 +204,7 @@ Ptrace是Linux提供的一个系统调用接口，通过Ptrace，可以在两个
 
 ##### 创建应用程序
 
-![Tracer & Tracee](https://ss.csdn.net/p?https://mmbiz.qpic.cn/mmbiz_png/A1HKVXsfHNmKOUVSw8QIMMBwSxvSluqTIXWxKxMlT7XEHOgdcc4sd18icoBEyD7l0mS3zFzic4iczocHkR7IJmxUg/640)
+![Tracer & Tracee](https://mmbiz.qpic.cn/mmbiz_png/A1HKVXsfHNmKOUVSw8QIMMBwSxvSluqTIXWxKxMlT7XEHOgdcc4sd18icoBEyD7l0mS3zFzic4iczocHkR7IJmxUg/640)
 
 当gVisor以Docker的Runtime启动的时候，可以看到类似的进程间关系：docker-containerd-shim是容器的启动器；sentry是gVisor用于截获系统调用模拟内核的程序，他也正是Tracer。Stub可以暂时不用理会，stub的子进程正是我们想要放到Sandbox里的应用程序。Sentry创建stub，随后stub创建应用程序进程，sentry通过Ptrace attach到了stub和应用程序上。当应用程序在将要执行系统调用的时候会主动stop，此时也正是sentry拦截和模拟系统调用的点。
 
