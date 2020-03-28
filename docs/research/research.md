@@ -220,6 +220,33 @@ Ptrace是Linux提供的一个系统调用接口，通过Ptrace，可以在两个
 
 ### ptrace 系统调用
 
+#### Ptrace简介
+
+`ptrace()`是一个系统调用，它允许一个进程控制另外一个进程的执行。不仅如此，Ptrace还可以修改某个进程的空间(内存或寄存器)，任何传递给一个进程(即被跟踪进程)的信号(除了会直接杀死进程的SIGKILL信号)都会使得这个进程进入暂停状态，这时系统通过`wait()`通知跟踪进程。这样，跟踪进程就可以修改被跟踪进程的行为了。
+
+#### Ptrace的具体实现
+
+`ptrace()`的原型如下：
+```
+#include <sys/ptrace.h>
+long int ptrace(enum __ptrace_request request, pid_t pid, void * addr, void * data)
+```
+`ptrace()`有4个参数,其中,request决定`ptrace()`做什么，pid是被跟踪进程的ID，data存储从进程空间偏移量为addr的地方开始将被读取/写入的数据。其中request的可选值是定义在/usr/include/sys/ptrace.h中的宏，其具体含义如下：
+
+- **PTRACE_TRACEME**：PTRACE_TRACEME是被父进程用来跟踪子进程的。它检查当前进程的ptrace标志是否已经被设置，没有的话就设置ptrace标志，除了request的任何参数(pid,addr,data)都将被忽略
+
+- **PTRACE_ATTACH**：request为PTRACE_ATTACH意味着一个进程想要控制另外一个进程。某种意义上，调用ptrace的进程就成为了ID为pid的进程的“父”进程。
+
+- **PTRACE_DETACH**：用来停止跟踪一个进程。跟踪进程决定被跟踪进程的生死。
+
+- **PTRACE_PEEKTEXT, PTRACE_PEEKDATA, PTRACE_PEEKUSER**：这些宏用来读取子进程的内存和用户态空间(user space)。
+
+- **PTRACE_POKETEXT, PTRACE_POKEDATA, PTRACE_POKEUSER**：这些宏用来向子进程的内存和用户态空间(user space)写入数据。
+
+- **PTRACE_SYSCALL, PTRACE_CONT**：这些宏用于控制子进程的暂停与继续。
+
+函数运行成功时返回0，否则返回-1。
+
 ## 立项依据
 
 gVisor 是一个尝试用 Go 语言编写的操作系统内核，希望劫持应用沙箱中的全部系统调用来保证沙箱内部的安全性，因而成为当今知名的安全容器实现。
@@ -340,4 +367,6 @@ https://github.com/proot-me/proot
 [谷歌黑科技：gVisor轻量级容器运行时沙箱](https://blog.csdn.net/qq_36512792/article/details/80503211)
 
 [WASI](https://hltj.me/wasm/2019/04/04/standardizing-wasi.html)
+
+[ptrace](https://blog.csdn.net/jxxiaohou/article/details/8985824)
 
