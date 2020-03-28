@@ -90,33 +90,33 @@ Docker是一个基于go语言编写的开源的应用容器引擎。通过使用
 
 ##### 启动与退出
 
-启动Docker `systemctl start docker`
+- 启动Docker `systemctl start docker`
 
-停止Docker `systemctl stop docker`
+- 停止Docker `systemctl stop docker`
 
-重启Docker `systemctl restart docker`
+- 重启Docker `systemctl restart docker`
 
 ##### 镜像相关操作
 
-列出所有镜像 `docker images`
+- 列出所有镜像 `docker images`
 
-搜索镜像 `docker search [IMAGE]`
+- 搜索镜像 `docker search [IMAGE]`
 
-拉取镜像 `docker pull [OPTIONS] NAME [:TAG]`
+- 拉取镜像 `docker pull [OPTIONS] NAME [:TAG]`
 
-推送镜像 `docker push NAME [:TAG]`
+- 推送镜像 `docker push NAME [:TAG]`
 
-创建镜像 `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
+- 创建镜像 `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
 
 ##### 容器相关操作
 
-启动容器 `docker run IMAGE_NAME [COMMAND] [ARG…]`
+- 启动容器 `docker run IMAGE_NAME [COMMAND] [ARG…]`
 
-列出容器 `docker ps`
+- 列出容器 `docker ps`
 
-查看容器 `docker inspect name | id`
+- 查看容器 `docker inspect name | id`
 
-重启停止的容器 `docker start [-i] 容器名`
+- 重启停止的容器 `docker start [-i] 容器名`
 
 
 
@@ -168,6 +168,9 @@ rVisor 在移入Linux内核后，也可以考虑在服务端使用。
 https://github.com/proot-me/proot
 
 ## 参考文献
+
 Docker——入门实战 https://blog.csdn.net/bskfnvjtlyzmv867/article/details/81044217
+
 Docker安装以及原理详解 https://blog.csdn.net/linxiyimeng007/article/details/81080223
+
 虚拟化的层次与机制 https://blog.csdn.net/mayp1/article/details/51296682
