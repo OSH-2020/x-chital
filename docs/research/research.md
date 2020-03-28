@@ -71,6 +71,56 @@ Docker是一个基于go语言编写的开源的应用容器引擎。通过使用
 
 - 更轻松的迁移：Docker 使用的分层存储以及镜像的技术，使得应用重复部分的复用更为容易，也使得应用的维护更新更加简单，基于基础镜像进一步扩展镜像也变得非常简单。此外，Docker 团队同各个开源项目团队一起维护了一大批高质量的官方镜像，既可以直接在生产环境使用，又可以作为基础进一步定制，大大的降低了应用服务的镜像制作成本。使用Dockerfile 使镜像构建透明化，不仅仅开发团队可以理解应用运行环境，也方便运维团队理解应用运行所需条件，帮助更好的生产环境中部署该镜像。
 
+#### Docker中的基本概念
+
+##### 镜像 (Image)
+
+镜像相当于一个特殊的文件系统，在Docker中，镜像为容器运行时提供需要的程序、库、资源、配置等文件，并会为之准备环境变量、匿名卷等配置参数。镜像不包含动态数据，在构建之后就不会被改变。
+镜像，从认识上简单的来说，就是面向对象中的类，相当于一个模板。从本质上来说，镜像相当于一个文件系统。Docker 镜像是一个特殊的文件系统，除了提供容器运行时所需的程序、库、资源、配置等文件外，还包含了一些为运行时准备的一些配置参数（如匿名卷、环境变量、用户等）。镜像不包含任何动态数据，其内容在构建之后也不会被改变。
+
+##### 容器 (Container)
+
+容器是通过镜像创建出的实体，其本质是进程。但其运行于属于自己的命名空间，可以拥有自己的文件系统、网络配置、进程空间，甚至自己的用户ID空间。这样的特质使容器创造出一个隔离的环境，在容器内运行进程相比直接运行在Host OS上更加安全。
+
+##### 仓库 (Repository)
+
+仓库用于保存用户构建的镜像。镜像构建完成后，可以很容易的在当前宿主机上运行，但是，如果需要在其它服务器上使用这个镜像，我们就需要一个集中的存储、分发镜像的服务，Docker Registry 就是这样的服务。
+
+#### Docker中的基本操作 
+
+##### 启动与退出
+
+启动Docker `systemctl start docker`
+
+停止Docker `systemctl stop docker`
+
+重启Docker `systemctl restart docker`
+
+##### 镜像相关操作
+
+列出所有镜像 `docker images`
+
+搜索镜像 `docker search [IMAGE]`
+
+拉取镜像 `docker pull [OPTIONS] NAME [:TAG]`
+
+推送镜像 `docker push NAME [:TAG]`
+
+创建镜像 `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
+
+##### 容器相关操作
+
+启动容器 `docker run IMAGE_NAME [COMMAND] [ARG…]`
+
+列出容器 `docker ps`
+
+查看容器 `docker inspect name | id`
+
+重启停止的容器 `docker start [-i] 容器名`
+
+
+
+
 
 
 
@@ -118,4 +168,6 @@ rVisor 在移入Linux内核后，也可以考虑在服务端使用。
 https://github.com/proot-me/proot
 
 ## 参考文献
-
+Docker——入门实战 https://blog.csdn.net/bskfnvjtlyzmv867/article/details/81044217
+Docker安装以及原理详解 https://blog.csdn.net/linxiyimeng007/article/details/81080223
+虚拟化的层次与机制 https://blog.csdn.net/mayp1/article/details/51296682
