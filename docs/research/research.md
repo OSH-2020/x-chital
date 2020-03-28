@@ -1,6 +1,4 @@
-
 # 调研报告
-
 [TOC]
 
 ## 小组成员
@@ -90,33 +88,33 @@ Docker是一个基于go语言编写的开源的应用容器引擎。通过使用
 
 ##### 启动与退出
 
-- **启动Docker** `systemctl start docker`
+- 启动Docker `systemctl start docker`
 
-- **停止Docker** `systemctl stop docker`
+- 停止Docker `systemctl stop docker`
 
-- **重启Docker** `systemctl restart docker`
+- 重启Docker `systemctl restart docker`
 
 ##### 镜像相关操作
 
-- **列出所有镜像**`docker images`
+- 列出所有镜像 `docker images`
 
-- **搜索镜像** `docker search [IMAGE]`
+- 搜索镜像 `docker search [IMAGE]`
 
-- **拉取镜像** `docker pull [OPTIONS] NAME [:TAG]`
+- 拉取镜像 `docker pull [OPTIONS] NAME [:TAG]`
 
-- **推送镜像** `docker push NAME [:TAG]`
+- 推送镜像 `docker push NAME [:TAG]`
 
-- **创建镜像** `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
+- 创建镜像 `docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
 
 ##### 容器相关操作
 
-- **启动容器** `docker run IMAGE_NAME [COMMAND] [ARG…]`
+- 启动容器 `docker run IMAGE_NAME [COMMAND] [ARG…]`
 
-- **列出容器** `docker ps`
+- 列出容器 `docker ps`
 
-- **查看容器** `docker inspect name | id`
+- 查看容器 `docker inspect name | id`
 
-- **重启停止的容器** `docker start [-i] 容器名`
+- 重启停止的容器 `docker start [-i] 容器名`
 
 ### Kubernetes
 
@@ -198,7 +196,27 @@ gVisor由谷歌发布，可以用于为资源占用较少、不需要运行完�
 
 #### gVisor的具体实现
 
-强调gVisor是一个小型Linux内核
+##### 截获系统调用
+
+gVisor使用Ptrace来截获系统调用。
+
+Ptrace是Linux提供的一个系统调用接口，通过Ptrace，可以在两个进程之间建立Tracer和Tracee之间的关系。Tracer可以控制Tracee，例如当Tracee收到信号的时候主动进入stopped状态，此时Tracer可以选择是否对Tracee做一些操作（比如设置Tracee的寄存器上下文或者内存中内容等），在操作执行后，Tracer可以选择是否让Tracee继续执行。Ptrace可以通过`PTRACE_SYSEMU`控制Tracee在即将进去系统调动时stop。gVisor就是通过该命令来截获应用程序的系统调用。
+
+##### 创建应用程序
+
+![Tracer & Tracee](https://ss.csdn.net/p?https://mmbiz.qpic.cn/mmbiz_png/A1HKVXsfHNmKOUVSw8QIMMBwSxvSluqTIXWxKxMlT7XEHOgdcc4sd18icoBEyD7l0mS3zFzic4iczocHkR7IJmxUg/640)
+
+当gVisor以Docker的Runtime启动的时候，可以看到类似的进程间关系：docker-containerd-shim是容器的启动器；sentry是gVisor用于截获系统调用模拟内核的程序，他也正是Tracer。Stub可以暂时不用理会，stub的子进程正是我们想要放到Sandbox里的应用程序。Sentry创建stub，随后stub创建应用程序进程，sentry通过Ptrace attach到了stub和应用程序上。当应用程序在将要执行系统调用的时候会主动stop，此时也正是sentry拦截和模拟系统调用的点。
+
+##### 应用程序的执行
+
+应用程序被启动起来后，在执行的过程中可能会陆续遇到新的SIGSEGV（譬如程序读写地址段，或者栈空间的扩展），或者执行系统调用。
+
+当应用程序在进入系统调用之前，由于系统调用被截获，应用程序会自动进入stopped状态，此时sentry读取应用程序的系统调用号以及系统调用入参，试图模拟该系统调用。
+
+以文件的读sys_read为例，sys_read的作用是找到指定的文件，打开并读取文件内容，并将内存写入到应用程序系统调用参数指定的虚拟内存地址上。Sentry在接到这个的系统调用时，会将文件读取请求通过9p协议发给之前提到的gofer进程（sentry和gofer之间有建立socket pair传输9p协议），由gofer进程执行真正的文件读取且将读到的内容通过9p协议返回给sentry。sentry把读取到的文件内容写入到应用程序的虚拟内存中（如果该地址没有对应的虚拟内存地址段，则分配后再复制），随后sentry将系统调用的实际模拟结果写入到应用程序的寄存器中，然后让应用程序继续执行。
+
+恢复执行后的应用程序因为得到了系统调用的结果，所以在应用程序在分不清实际上系统调用是直接由操作系统执行了还是由sentry做的模拟的情况下，系统调用得到了满足。
 
 ### ptrace 系统调用
 
@@ -293,3 +311,7 @@ https://github.com/proot-me/proot
 [Kubernetes](https://blog.csdn.net/liuj2511981/article/details/80442394)
 
 [传统容器已死，安全容器将成为云原生标配](https://zhuanlan.zhihu.com/p/99182075)
+
+[gVisor是什么？可以解决什么问题？](https://blog.csdn.net/M2l0ZgSsVc7r69eFdTj/article/details/82754587)
+
+[谷歌黑科技：gVisor轻量级容器运行时沙箱](https://blog.csdn.net/qq_36512792/article/details/80503211)
