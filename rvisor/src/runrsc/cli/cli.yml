@@ -1,0 +1,36 @@
+name: runrs
+version: "0.0"
+author: chital <chital@gmail.com>
+about: run rVisor Container like runc and runsc.
+args:
+    - config:
+        short: c
+        long: config
+        value_name: FILE
+        help: Sets a custom config file
+        takes_value: true
+subcommands:
+    - run:
+        about: run a container.
+        version: "0.0"
+        author: DnailZ <dnailzb@outlook.com>
+        args:
+            - tty:
+                short: t
+                help: using tty as user interface.
+            - INNER_PROGRAM:
+                help: program to run inside the sandbox.
+                required: true
+                index: 1
+    - boot: 
+        about: (subcommands for inner use)
+        version: "0.0"
+        author: DnailZ <dnailzb@outlook.com>
+        args:
+            - tty:
+                short: t
+                help: using tty as user interface.
+            - INNER_PROGRAM:
+                help: program to run inside the sandbox.
+                required: true
+                index: 1
