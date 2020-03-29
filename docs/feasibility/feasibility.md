@@ -155,19 +155,130 @@ The child made a system call 11
 放回寄存器值的同时，也放回了指令指针&eip。
 
 执行过程如下图：
-![feasibility_00](../resources/feasibility_00.png)
+![feasibility_00](./assets/feasibility_00.png)
 
 在eip后写入了int3指令实现断点，触发断点后，又将原寄存器和指令写回(eip也回到了原始值)，则子进程被还原到原始状态。若要实现代码注入，可用同样方式实现。
 
 ## 技术路线
 
-### 实现文件系统的隔离
+### 实现文件系统的隔离（chroot）
+
+想要实现文件系统的隔离，就要实现 `open` 和 `openat` 系统调用。
+
+要实现 `open` ，就要对所有传入的调用做翻译（`translate`），即将调用中传入的地址，翻译成全局系统的地址，具体代码如下：
+
+```c
+int translate_path(Tracee *tracee, char result[PATH_MAX], int dir_fd,
+    const char *user_path, bool deref_final)
+{
+	char guest_path[PATH_MAX];
+	int status;
+
+	/* Use "/" as the base if it is an absolute guest path. */
+    /* 用 "/" 开头表示，输入地址为沙箱内的绝对地址 */
+	if (user_path[0] == '/') {
+		strcpy(result, "/");
+	}
+	/* It is relative to a directory referred by a descriptor, see
+	 * openat(2) for details. */
+    /* 按照 openat 调用的要求，如果pathname是相对路径，并且dirfd的值不是AT_FDCWD，则pathname的参照物是相对于dirfd指向的目录，而不是进程的当前工作目录。对于 open 调用来说，则不需考虑这种情况 */
+	else if (dir_fd != AT_FDCWD) {
+		/* /proc/@tracee->pid/fd/@dir_fd -> result.  */
+		status = readlink_proc_pid_fd(tracee->pid, dir_fd, result);
+		if (status < 0)
+			return status;
+
+		/* Named file descriptors may reference special
+		 * objects like pipes, sockets, inodes, ...  Such
+		 * objects do not belong to the file-system.  */
+		if (result[0] != '/')
+			return -ENOTDIR;
+
+		/* Remove the leading "root" part of the base
+		 * (required!). */
+		status = detranslate_path(tracee, result, NULL);
+		if (status < 0)
+			return status;
+	}
+	/* It is relative to the current working directory.  */
+    /* 按照进程的 cwd 来获取地址 */
+	else {
+		status = getcwd2(tracee, result);
+		if (status < 0)
+			return status;
+	}
+
+	/* So far "result" was used as a base path, it's time to join
+	 * it to the user path.  */
+    /* 之前的地址都为基地址，下面要求出用户所需的地址 */
+	status = join_paths(2, guest_path, result, user_path);
+	if (status < 0)
+		return status;
+	strcpy(result, "/");
+
+	/* Canonicalize regarding the new root. */
+    /* Canonicalize: 简化地址，去掉像 /.././ 这种地址，即realpath命令的功能 */
+	status = canonicalize(tracee, guest_path, deref_final, result, 0);
+	if (status < 0)
+		return status;
+
+	/* Final binding substitution to convert "result" into a host
+	 * path, since canonicalize() works from the guest
+	 * point-of-view.  */
+    /* 转化成主机 Host 的地址 */
+	status = substitute_binding(tracee, GUEST, result);
+	if (status < 0)
+		return status;
+
+	return 0;
+}
+```
+
+然后对 ptrace 的寄存器进行修改，就可以实现 `open` 和 openat 系统调用了。
+
+有些文件操作，诸如 `read` `write` 都不用修改，可以直接拿来使用。
+
+有了 `translate_path` 之后，其他的文件系统操作，诸如 `chdir` 可以采用类似方式实现。
 
 ### 实现进程管理
 
-### 支持WASI
+要利用 ptrace 监控子进程的调用，可以添加 ptrace 的参数 PTRACE_O_TRACEFORK 来使用。
 
-### 支持移动端平台
+具体使用细节可以参考 man page：
+
+```
+    PTRACE_O_TRACEFORK (since Linux 2.5.46)
+            Stop the tracee at the next fork(2) and automatically
+            start tracing the newly forked process, which will
+            start with a SIGSTOP, or PTRACE_EVENT_STOP if
+            PTRACE_SEIZE was used.  A waitpid(2) by the tracer will
+            return a status value such that
+```
+
+ptrace 会引起一次 SIGSTOP，供我们记录 fork 时的状态。
+
+vfork 和 clone 也有相应的 option: PTRACE_O_TRACEVFORK、PTRACE_O_TRACECLONE 可供使用。wait、execve 等系统调用都比较容易实现。
+
+为了更进一步地管理进程，可以使用 cgroup 来限制进程地资源，对进程做一些管理。
+
+### 实现更多的系统调用，进一步完善功能
+
+虽然实现以上的系统调用都比较简单，但实现所有系统调用并不简单，特别是一些调试用的系统调用和进程间通信相关的系统调用。
+
+可以参照 gVisor 进一步可以实现：
+
+* 管道 pipe 来做进程间通讯。
+* Memory Manage 的相关功能，将内存的段和页管理起来，也可以实现共享内存。
+* 实现文件系统的映射功能，对应于 gVisor 的 Gofer。
+* 为 进程提供网络支持。
+
+rVisor 目前不太可能能实现所有功能，我们只需要实现一些比较常用的功能证明其可用性即可。
+
+### 进一步考虑 Linux 内核的移植
+
+这一部分是本组大作业最为创新的部分，我们想要改造内核，减少一次系统调用的开销，具体方法有很多，目前的一个想法是将监控的进程和被监控的进程建立一个共享内存，其中可以存放监控过程的代码，每次调用系统调用时，跳转到共享内存来执行，可以尝试修改Linux内核来实现。具体可行性也需要进一步研究。
+
+考虑到时间可能比较有限，这一部分可能只能给出理论上的实现方法。
 
 ## 参考文献
 
@@ -176,3 +287,9 @@ sandbox(computer security): https://en.wikipedia.org/wiki/Sandbox_(computer_secu
 Playing with ptrace, Part I: https://www.linuxjournal.com/article/6100
 
 Playing with ptrace, Part II: https://www.linuxjournal.com/article/6210
+
+ptrace man page: http://man7.org/linux/man-pages/man2/ptrace.2.html
+
+how to use PTRACE_TRACEFORK: https://groups.google.com/forum/#!topic/comp.os.linux.development.system/jJVf5Y4XUwY
+
+open man page : http://man7.org/linux/man-pages/man2/open.2.html
