@@ -309,11 +309,10 @@ rVisor 计划基于 rust 实现一个高性能的安全沙箱容器，在 gVisor
 
 ### gVisor
 
->虽然Container上可以通过Namespace和Cgroup做资源的限制，但Container里的应用程序依然可以访问很多系统资源。事实上跟没有跑在Container里的应用程序一样，Container里的应用程序可以直接通过Linux内核的系统调用陷入到内核。任何一个被允许（通过Seccomp过滤系统调用）的系统调用的缺陷都可以被恶意的应用程序利用。
 
-​	gvisor是Google开发的一个安全容器. 它阻断了所有的直接系统调用, 并且模拟了这些syscall. 正因为要实现所有的系统调用(实际上gvisor成为了一个小型Linux内核), gvisor在实现了良好的, 接近Virtual machine的隔离性&安全性的同时, 代码量也相对较大. 
+gvisor是Google开发的一个安全容器. 它阻断了所有的直接系统调用, 并且模拟了这些syscall. 正因为要实现所有的系统调用(实际上gvisor成为了一个小型Linux内核), gvisor在实现了良好的, 接近Virtual machine的隔离性&安全性的同时, 代码量也相对较大。
 
-​	另一方面, gvisor通过go构建, 因此性能会受到制约. 
+gVisor 在前面有比较多的介绍，这里不再展开。
 
 ### WASI:  WebAssemably平台的系统接口
 
@@ -324,17 +323,19 @@ WASI目前有3种实现:
 2. lucet, fastly开发
 3. 浏览器垫片(polyfill, [demo](https://wasi.dev/polyfill/))
 
-之后如果进展顺利, 这个项目可能会支持WASI
+WASI 本身，也是进程级虚拟化的一种实现，WASI 比起 rVisor，更适于跨平台使用，但是由于 WASI 基于 WASM，但由于 WASI 基于 Webassembly， WASI 会比 native 代码慢三倍以上。而 gVisor 的仅仅在大量处理系统调用的时候才会有比较大的性能开销。
+
+本项目也可以尝试与 WASI 兼容，实现 WebAssembly 与 native 代码的相互调用，如果能获得浏览器支持，也可以尝试为浏览器提供安全执行 native 代码的小型沙箱环境。但这样做需要浏览器的支持，对我们小组而言会比较困难。
 
 ### PRoot
 
 [GitHub代码仓库](https://github.com/proot-me/proot)
 
-​	Proot是一个使用ptrace的chroot-like implemention. 类似于chroot, 他可以改变命令执行的根目录位置. 不同于chroot, proot不需要root权限, 可以在用户空间实现(ptrace也是一种unprivileged system-call)
+​Proot是一个使用ptrace的chroot-like implemention. 类似于chroot, 他可以改变命令执行的根目录位置. 不同于chroot, proot不需要root权限, 可以在用户空间实现(ptrace也是一种unprivileged system-call)
 
 > [PRoot详细介绍和用法](https://proot-me.github.io/)
 
-https://github.com/proot-me/proot
+PRoot 的实现与 gVisor 类似，可以作为我们的一个参考。其代码量更小，更易于我们学习和实现。
 
 ## 参考文献
 
@@ -360,7 +361,7 @@ https://github.com/proot-me/proot
 
 [谷歌黑科技：gVisor轻量级容器运行时沙箱](https://blog.csdn.net/qq_36512792/article/details/80503211)
 
-[WASI](https://hltj.me/wasm/2019/04/04/standardizing-wasi.html)
+[WASI 参考](https://hltj.me/wasm/2019/04/04/standardizing-wasi.html)
 
-[ptrace](https://blog.csdn.net/jxxiaohou/article/details/8985824)
+[ptrace 参考](https://blog.csdn.net/jxxiaohou/article/details/8985824)
 
