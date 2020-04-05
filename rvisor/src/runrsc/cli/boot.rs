@@ -1,4 +1,4 @@
-
+use std::path::Path;
 use std::process::{Command, Stdio};
 use sentry::kernel::{Kernel, task};
 use log::info;
@@ -17,7 +17,7 @@ pub fn boot_commmand(tty: bool, command: &str) {
         parent.stderr(Stdio::inherit());
     }
     
-    let mut k = Kernel::new();
+    let mut k = Kernel::new(Path::new(".")).unwrap();
     if let Err(e) = k.create_task(parent) {
         println!("create_task err : {}", e);
     }

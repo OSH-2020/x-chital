@@ -43,27 +43,29 @@ fn configure(pid : i32) -> Result<()> {
     Ok(())
 }
 
-pub fn event_loop() -> Result<()> {
-    info!("ptrace event loop start");
+pub trait Tracer {
 
-    loop {
-        let status = wait().expect("wait failed!");
-        debug!("waitpid returned : {:?}", status);   
-        match status {
-            WaitStatus::PtraceSyscall(pid) => {
-                debug!("get ptrace syscall");
+    fn event_loop(&self) -> Result<()> {
+        info!("ptrace event loop start");
 
-                let regs = ptrace::getregs(pid)
-                                    .expect("getreg failed");
-                println!("{}", regs.orig_rax);
-                ptrace::syscall(pid, None)
-                                    .expect("ptrace::syscall failed");
+        loop {
+            let status = wait().expect("wait failed!");
+            debug!("waitpid returned : {:?}", status);   
+            match status {
+                WaitStatus::PtraceSyscall(pid) => {
+                    debug!("get ptrace syscall");
+
+                    let regs = ptrace::getregs(pid)
+                                        .expect("getreg failed");
+                    println!("{}", regs.orig_rax);
+                    ptrace::syscall(pid, None)
+                                        .expect("ptrace::syscall failed");
+                }
+                _ => break
             }
-            _ => break
-        }
-    };
+        };
 
-    info!("ptrace end");
-    Ok(())
+        info!("ptrace end");
+        Ok(())
+    }
 }
-

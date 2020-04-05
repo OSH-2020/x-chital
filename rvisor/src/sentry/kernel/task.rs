@@ -2,10 +2,10 @@ use super::Kernel;
 
 use std::process::{Command, Child};
 use std::os::unix::process::CommandExt;
-
 use log::info;
 
 use crate::platform::ptrace;
+use crate::platform::ptrace::Tracer;
 use crate::error::Result;
 
 pub struct Task {
@@ -38,7 +38,8 @@ impl Kernel {
         Ok(())
     }
     pub fn run(&mut self) -> Result<()> {
-        ptrace::event_loop()?;
+        self.event_loop()?;
         Ok(())
     }
 }
+
