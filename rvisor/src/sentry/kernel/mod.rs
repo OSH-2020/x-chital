@@ -1,7 +1,5 @@
 pub mod task;
-pub use task::*;
-
-use super::platform;
+pub mod fs;
 
 pub struct Kernel {
     tasks : Vec<task::Task>

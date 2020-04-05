@@ -1,9 +1,9 @@
 
 use std::process::{Command, Stdio};
-use super::sentry::kernel::Kernel;
-
+use sentry::kernel::{Kernel, task};
 use log::info;
 
+// use sentry library as a container.
 pub fn boot_commmand(tty: bool, command: &str) {
 
     info!("executing boot command");
@@ -18,10 +18,13 @@ pub fn boot_commmand(tty: bool, command: &str) {
     }
     
     let mut k = Kernel::new();
-    if let Err(e) = k.create_task(&mut parent) {
+    if let Err(e) = k.create_task(parent) {
         println!("create_task err : {}", e);
     }
-    info!("kernel created");
+    
+    if let Err(e) = k.run() {
+        println!("create_task err : {}", e);
+    }
 
-    k.run();
+    info!("kernel created");
 }

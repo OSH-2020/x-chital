@@ -1,12 +1,12 @@
 
 use std::process::{Command};
-
 use log::info;
 
-
+// start 'runrs boot'
 pub fn run_commmand(tty: bool, command: &str) {
     info!("executing run command");
     
+    // /proc/self/exe is like 127.0.0.1, a symbol for the same execuble file.
     let mut parent = Command::new("/proc/self/exe");
     
     parent.arg("boot");
@@ -17,7 +17,7 @@ pub fn run_commmand(tty: bool, command: &str) {
     }
     
     let mut parent = parent.spawn()
-    .expect("failed to create init command process");
+        .expect("failed to create init command process");
     
     // wait for end of the process
     let ecode = parent.wait()

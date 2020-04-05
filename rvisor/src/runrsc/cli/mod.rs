@@ -1,3 +1,4 @@
+// this module is all subcommand for our container manager runrsc
 
 
 // we are using clap for runrs's subcommand
@@ -18,12 +19,12 @@ use super::sentry;
 
 pub fn run_cli() {
     use log::info;
-
     info!("running client.");
     // cli.yml contains the defination of the subcommand
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
 
+    // run: start a container
     if let Some(matches) = matches.subcommand_matches("run") {
         let input = matches.value_of("INNER_PROGRAM").unwrap();
 
@@ -31,6 +32,7 @@ pub fn run_cli() {
         run::run_commmand(tty, input);
     }
 
+    // boot is a inner command, serve as a process for sentry (like gVisor)
     if let Some(matches) = matches.subcommand_matches("boot") {
         let input = matches.value_of("INNER_PROGRAM").unwrap();
 

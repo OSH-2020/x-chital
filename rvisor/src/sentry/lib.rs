@@ -5,4 +5,6 @@ extern crate env_logger;
 
 pub mod kernel;
 pub mod platform;
+pub mod error;
+
 
