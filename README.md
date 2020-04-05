@@ -8,5 +8,5 @@
 
 * 丁垣天 dnailzb@outlook.com
 * 叶之帆 rabbitforyou@foxmail.com
-* 何灏迪
+* 何灏迪 hardyhe2019@outlook.com
 * 郑在一 donpanica@outlook.com
