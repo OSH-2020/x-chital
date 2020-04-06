@@ -1,5 +1,6 @@
 pub mod task;
 pub mod fs;
+pub mod syscall;
 
 use std::path::Path;
 use crate::platform::ptrace;
@@ -18,5 +19,3 @@ impl Kernel {
         })
     }
 }
-
-impl ptrace::Tracer for Kernel {}

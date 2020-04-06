@@ -43,7 +43,7 @@ impl Fs {
 
         let host_path = self.root.join(guest_path);
 
-        println!("translate_path -> {:?}", host_path);
+        debug!("translate_path -> {:?}", host_path);
         let host_path = host_path.canonicalize()?;
 
         if !host_path.starts_with(&self.root) {

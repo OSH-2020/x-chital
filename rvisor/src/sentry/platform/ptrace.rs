@@ -10,6 +10,7 @@ use nix::unistd::Pid;
 use nix::sys::wait::WaitStatus;
 
 use crate::error::Result;
+use super::registers::{Registers, SysReg, Word};
 
 pub unsafe fn create_process(mut cmd : Command) -> Result<Child> {
     // ! pre_exec use fork, can't handle child's error, so make it unsafe
@@ -35,7 +36,7 @@ fn configure(pid : i32) -> Result<()> {
     if let WaitStatus::Stopped(_, sig) = waitpid(pid, None).unwrap() {
         assert_eq!(sig, Signal::SIGTRAP);
 
-        ptrace::setoptions(pid, ptrace::Options::PTRACE_O_TRACESYSGOOD)?;
+        ptrace_set_option(pid)?;
         ptrace::syscall(pid, None)?;
     } else {
         panic!("child not stop");
@@ -43,25 +44,61 @@ fn configure(pid : i32) -> Result<()> {
     Ok(())
 }
 
-pub trait Tracer {
+fn ptrace_set_option(pid : Pid) -> Result<()> {
+    use ptrace::Options;
+    ptrace::setoptions(pid,
+        Options::PTRACE_O_TRACESYSGOOD |
+        Options::PTRACE_O_TRACEFORK |
+        Options::PTRACE_O_TRACEVFORK |
+        Options::PTRACE_O_TRACECLONE |
+        Options::PTRACE_O_TRACEEXIT
+    )?;
+    Ok(())
+}
 
-    fn event_loop(&self) -> Result<()> {
+pub trait Tracer {
+    fn enter_syscall(&mut self, pid : Pid);
+    fn exit_syscall(&mut self, pid : Pid);
+
+    fn event_loop(&mut self) -> Result<()> {
         info!("ptrace event loop start");
+        let mut entering = true;
 
         loop {
             let status = wait().expect("wait failed!");
-            debug!("waitpid returned : {:?}", status);   
+            debug!("{:?}", status);
             match status {
-                WaitStatus::PtraceSyscall(pid) => {
-                    debug!("get ptrace syscall");
-
-                    let regs = ptrace::getregs(pid)
-                                        .expect("getreg failed");
-                    println!("{}", regs.orig_rax);
+                WaitStatus::PtraceSyscall(pid) if entering => {
+                    self.enter_syscall(pid);
                     ptrace::syscall(pid, None)
                                         .expect("ptrace::syscall failed");
+                    entering = !entering;
                 }
-                _ => break
+                WaitStatus::PtraceSyscall(pid) if !entering => {
+                    self.exit_syscall(pid);
+                    ptrace::syscall(pid, None)
+                                        .expect("ptrace::syscall failed");
+                    entering = !entering;
+                }
+                WaitStatus::Stopped(pid, sig)  => {
+                    info!("{} stopped with {}", pid, sig);
+                    ptrace_set_option(pid).unwrap();
+                    ptrace::syscall(pid, None)
+                        .expect("ptrace::syscall failed");
+                }
+                WaitStatus::PtraceEvent(pid, Signal::SIGTRAP, i) => {
+                    info!("{} SIGTRAP with {}", pid, i);
+                    ptrace_set_option(pid).unwrap();
+                    ptrace::syscall(pid, None)
+                        .expect("ptrace::syscall failed");
+                }
+                WaitStatus::Exited(pid, i) => {
+                    info!("process {} exit with {}", pid, i);
+                    break;
+                }
+                _ => {
+                    panic!("unimplement event!");
+                }
             }
         };
 
