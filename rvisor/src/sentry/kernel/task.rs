@@ -10,23 +10,29 @@ use crate::error::Result;
 
 pub struct Task {
     pid : i32,
-    process : Child
 }
+
+// fn setenv(cmd : & mut Command) -> Result<()>{
+    // TODO: cmd.env("PATH", "/bin")
+    // TODO: "USER"
+    // TODO: "HOME"
+    // 
+// }
+
 
 impl Task {
     pub fn create(cmd : Command) -> Result<Task> {
         info!("creating task for cmd {:#?}", cmd);
-        
+        // TODO: setenv(cmd);
         let child = unsafe {
             ptrace::create_process(cmd)?
         };
         let pid = child.id() as i32;
-
+        
         info!("task created with pid: {}", pid);
 
         Ok(Task {
             pid : pid,
-            process: child,
         })
     }
 }

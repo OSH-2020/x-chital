@@ -39,10 +39,14 @@ impl ptrace::Tracer for Kernel {
         let mut regs = Registers::get_from(pid)
                 .expect("getreg failed");
         let sysnum = FromPrimitive::from_u64(regs.get(SysReg::Num));
+        
         debug!("get ptrace syscall regs sysnum : {:?}", sysnum);
+
         match sysnum{
             Some(Syscall::Openat) => {
                 self.openat_enter(&mut regs);
+                regs.set_to()
+                            .expect("registers set_to failed");
             }
             Some(_) => (),
             None => {

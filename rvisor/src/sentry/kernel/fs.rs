@@ -13,6 +13,7 @@ pub struct Fs {
 
 impl Fs {
     pub fn new(root : &Path) -> Result<Fs> {
+        // add some path
         Ok(Fs {
             cwd: Path::new("/").to_path_buf(),
             root: root.canonicalize()?,
@@ -44,7 +45,7 @@ impl Fs {
         let host_path = self.root.join(guest_path);
 
         debug!("translate_path -> {:?}", host_path);
-        let host_path = host_path.canonicalize()?;
+        let host_path = host_path.canonicalize()?; // ! 如果文件不存在，此处会出现io::Error(NotFound)异常
 
         if !host_path.starts_with(&self.root) {
             let ioerr = io::Error::new(io::ErrorKind::NotFound, "path not found");
@@ -82,5 +83,4 @@ mod test {
             )
         );
     }
-
 }

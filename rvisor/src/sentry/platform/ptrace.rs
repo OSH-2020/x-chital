@@ -57,6 +57,7 @@ fn ptrace_set_option(pid : Pid) -> Result<()> {
 }
 
 pub trait Tracer {
+    //Kernel 实现 Tracer，可以通过实现 enter/exit 来使用ptrace。
     fn enter_syscall(&mut self, pid : Pid);
     fn exit_syscall(&mut self, pid : Pid);
 

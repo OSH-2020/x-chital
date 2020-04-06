@@ -10,7 +10,7 @@ pub mod mem;
 pub type Word = std::os::raw::c_ulong;
 
 pub enum SysReg {
-    Num,
+    Num, // sysnum 系统调用号
     Arg1,
     Arg2,
     Arg3,
@@ -23,6 +23,7 @@ pub struct Registers {
     // save Stack Pointer
     orig_sp : Word,
 }
+
 
 impl Registers {
     pub fn get_from(pid : Pid) -> Result<Self> {
