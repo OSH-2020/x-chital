@@ -12,18 +12,17 @@ pub struct Task {
     pid : i32,
 }
 
-// fn setenv(cmd : & mut Command) -> Result<()>{
-    // TODO: cmd.env("PATH", "/bin")
-    // TODO: "USER"
-    // TODO: "HOME"
-    // 
-// }
+fn setenv(cmd : & mut Command) {
+    cmd.env_clear().env("PATH", "/usr/bin").env("PWD", "/");
+    info!("environment variables $PATH and $PWD have been setted for cmd {:#?}.", cmd);
+}
+
 
 
 impl Task {
     pub fn create(cmd : Command) -> Result<Task> {
         info!("creating task for cmd {:#?}", cmd);
-        // TODO: setenv(cmd);
+        setenv(&mut cmd);
         let child = unsafe {
             ptrace::create_process(cmd)?
         };
