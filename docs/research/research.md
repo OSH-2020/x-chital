@@ -303,7 +303,7 @@ rVisor 计划通过将 gVisor 重写，然后移入 Linux 内核，以减少这�
 
 Go 并不适合操作系统领域的开发。Go 本身带有 GC 机制，虽然其语法比较像 C 语言，其目标是替代 Java、Python 的位置，做一个高性能且能够快速开发的语言。用 Go 开发操作系统[会带来一定的开销](https://pdos.csail.mit.edu/papers/biscuit.pdf)。而 Rust 没有 GC，效率上与 C/C++ 相进，适宜于操作系统、嵌入式的开发。
 
-在容器领域，像 LXC 这种容器底层的部件往往都由 C 编写，Go 语言往往用于上层的调度工作。
+在容器领域，像 namespace，cgroup 这种容器底层的部件往往都由 C 编写，Go 语言往往用于上层的调度工作。
 
 Rust 在容器领域中也有一些初步的运用，比如经常与 gVisor 并列的 Kata 的核心部件：[Kata-Agent](https://github.com/kata-containers/kata-containers)，就从 Go 迁移到了 Rust，可见将容器领域的核心部件用 rust 重写有一定的价值。
 
