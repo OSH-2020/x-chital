@@ -1,0 +1,11 @@
+[package]
+name = "rvisor-kernel"
+version = "0.1.0"
+authors = ["dnailz"]
+edition = "2018"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+linux-kernel-module = { path = "./linux-kernel-module-rust" }

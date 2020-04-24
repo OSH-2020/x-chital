@@ -1,0 +1,11 @@
+Cargo.lock
+*.mod.c
+*.cmd
+*.ko
+*.o
+*.mk
+modules.order
+Module.symvers
+target/
+.tmp_versions/
+.vscode/

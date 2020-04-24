@@ -6,6 +6,7 @@ extern crate libc;
 extern crate byteorder;
 extern crate num_derive;
 extern crate num_traits;
+extern crate nix;
 
 pub mod kernel;
 pub mod platform;
