@@ -5,8 +5,11 @@ rvisor-objs := $(proj_name).rust.o
 
 CARGO ?= cargo
 
-$(src)/target/x86_64-linux-kernel/debug/lib$(proj_name).a: $(src)/Cargo.toml $(wildcard $(src)/src/*.rs) $(wildcard $(src)/src/cshim/*.c)
+$(src)/target/x86_64-linux-kernel/debug/lib$(proj_name).a: $(src)/Cargo.toml $(wildcard $(src)/src/*.rs) linux_kernel_module
 	cd $(src); env -u MAKE -u MAKEFLAGS $(CARGO) build -Z build-std=core,alloc --target=x86_64-linux-kernel
 
 %.rust.o: target/x86_64-linux-kernel/debug/lib%.a
 	$(LD) -r -o $@ --whole-archive $<
+
+linux_kernel_module: $(wildcard $(src)/src/cshim/*.c)
+	echo " " >> $(src)/linux-kernel-module-rust/build.rs

@@ -12,3 +12,5 @@ clean:
 ins: all
 	-sudo rmmod $(KERN_OBJ)
 	sudo insmod $(KERN_OBJ).ko
+doc:
+	cargo doc --document-private-items
