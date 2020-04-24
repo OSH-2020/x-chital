@@ -40,6 +40,7 @@ inline void restore_wp ( unsigned long cr0 ) {
 void **syscall_table;
 
 // 0xffffffffb5a00240 is your syscall address
+// you should run `sudo cat /boot/System.map-$(uname -r) | grep sys_call_table`
 int replace_init() {
     syscall_table = (void **) (unsigned long *) 0xffffffffb5a00240;
     return 0;
