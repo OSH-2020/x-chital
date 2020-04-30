@@ -10,6 +10,7 @@ clean:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) clean
 
 ins: all
+	-sudo dmesg --clear
 	-sudo rmmod $(KERN_OBJ)
 	sudo insmod $(KERN_OBJ).ko
 doc:

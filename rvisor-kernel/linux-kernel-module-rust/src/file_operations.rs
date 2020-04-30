@@ -1,6 +1,5 @@
 use core::convert::{TryFrom, TryInto};
 use core::{marker, mem, ptr};
-
 use alloc::boxed::Box;
 
 use crate::bindings;
@@ -110,22 +109,35 @@ unsafe extern "C" fn llseek_callback<T: Seek>(
     file: *mut bindings::file,
     offset: bindings::loff_t,
     whence: c_types::c_int,
-) -> bindings::loff_t {
+) -> i64 {
     let off = match whence as u32 {
         bindings::SEEK_SET => match offset.try_into() {
             Ok(v) => SeekFrom::Start(v),
-            Err(_) => return Error::EINVAL.to_kernel_errno().into(),
+            Err(_) => return Error::EINVAL.to_kernel_errno() as i64,
         },
         bindings::SEEK_CUR => SeekFrom::Current(offset),
         bindings::SEEK_END => SeekFrom::End(offset),
-        _ => return Error::EINVAL.to_kernel_errno().into(),
+        _ => return Error::EINVAL.to_kernel_errno() as i64,
     };
     let f = &*((*file).private_data as *const T);
     match f.seek(&File::from_ptr(file), off) {
-        Ok(off) => off as bindings::loff_t,
-        Err(e) => e.to_kernel_errno().into(),
+        Ok(off) => off as i64,
+        Err(e) => e.to_kernel_errno() as i64,
     }
 }
+
+unsafe extern "C" fn unlocked_ioctl_callback<T: Ioctl>(
+    file: *mut bindings::file,
+    cmd: u32,
+    arg: u64
+) -> i64 {
+    let f = &*((*file).private_data as *const T);
+    match f.ioctl(cmd, arg) {
+        Ok(ret) => ret,
+        Err(e) => e.to_kernel_errno() as i64,
+    }
+}
+
 
 impl FileOperationsVtable {
     pub const fn builder<T: FileOperations>() -> FileOperationsVtableBuilder<T> {
@@ -209,6 +221,13 @@ impl<T: Seek> FileOperationsVtableBuilder<T> {
     }
 }
 
+impl<T: Ioctl> FileOperationsVtableBuilder<T> {
+    pub const fn ioctl(mut self) -> FileOperationsVtableBuilder<T> {
+        self.0.unlocked_ioctl = Some(unlocked_ioctl_callback::<T>);
+        self
+    }
+}
+
 /// `FileOperations` corresponds to the kernel's `struct file_operations`. You
 /// implement this trait whenever you'd create a `struct file_operations`, and
 /// also an additional trait for each function pointer in the
@@ -243,4 +262,8 @@ pub trait Seek {
     /// Changes the position of the file. Corresponds to the `llseek` function
     /// pointer in `struct file_operations`.
     fn seek(&self, file: &File, offset: SeekFrom) -> KernelResult<u64>;
+}
+
+pub trait Ioctl{
+    fn ioctl(&self, cmd: u32, arg: u64) -> KernelResult<i64>;
 }
