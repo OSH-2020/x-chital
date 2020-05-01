@@ -48,6 +48,7 @@ mod iodev;
 /// 
 /// I'll test if every static varible should inside this struct.
 struct RVisorModule {
+    /// chrdev_registration: 为linux增加一个主设备号，可以用mknod获得设备文件。
     chrdev_registration: chrdev::Registration,
 }
 
@@ -57,7 +58,8 @@ impl linux_kernel_module::KernelModule for RVisorModule {
     fn init() -> linux_kernel_module::KernelResult<Self> {
         info!(": module init");
         hook::init();
-
+        
+        // 登记设备名，和设备文件struct
         let _chrdev_registration =
                 chrdev::builder(cstr!("rvisor"), 0..1)?
                     .register_device::<iodev::IoDeviceFile>()

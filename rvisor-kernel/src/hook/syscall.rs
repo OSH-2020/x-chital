@@ -7,6 +7,7 @@ extern "C" {
     fn orig_getpid() -> c_long;
 }
 
+/// 重写的open系统调用。
 pub extern "C" fn rvisor_open(filename: * const u8, flags : c_int, mode : bindings::umode_t) -> c_long {
     unsafe{
         let i = orig_getpid();

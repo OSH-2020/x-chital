@@ -12,7 +12,7 @@ extern "C" {
     /// recover the replace
     fn replace_clear() -> c_int;
 }
-
+/// replace_syscall 的安全包装
 fn safe_replace_syscall(sysnum : c_uint, f_ptr : *const()) {
     unsafe{
         let i = replace_syscall(sysnum, f_ptr);
@@ -22,6 +22,7 @@ fn safe_replace_syscall(sysnum : c_uint, f_ptr : *const()) {
     }
 }
 
+/// init的时候调用
 pub fn init() {
     unsafe{
         if replace_init() == -1 {
@@ -31,6 +32,7 @@ pub fn init() {
     safe_replace_syscall(bindings::__NR_open, syscall::rvisor_open as *const());
 }
 
+/// 退出的时候调用
 pub fn cleanup() {
     unsafe{
         if replace_clear() == -1 {
