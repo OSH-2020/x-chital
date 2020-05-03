@@ -10,33 +10,72 @@
 //! 
 use linux_kernel_module::file_operations as fops;
 use linux_kernel_module::KernelResult;
+use linux_kernel_module::bindings;
+use linux_kernel_module::Error;
+use crate::container::Container;
+
+use alloc::borrow::ToOwned;
+use alloc::string::String;
+use crate::kernel;
+use crate::string;
+
+#[repr(u32)]
+enum IoctlCmd {
+    Create = 0,
+    AddProc = 1,
+    Remove = 2,
+}
+
+impl IoctlCmd {
+    fn try_from(i : u32) -> KernelResult<IoctlCmd> {
+        match i {
+            0 => Ok(IoctlCmd::Create),
+            1 => Ok(IoctlCmd::AddProc),
+            2 => Ok(IoctlCmd::Remove),
+            _ => Err(Error::EINVAL),
+        }
+    }
+}
 
 /// 输入输出文件，
-pub struct IoDeviceFile;
+pub struct IoDeviceFile {}
 
 
 /// 实现 IoDeviceFile trait，
 impl fops::FileOperations for IoDeviceFile {
+    /// 原本的 `struct * file_operations`
     const VTABLE: fops::FileOperationsVtable =
     fops::FileOperationsVtable::builder::<Self>()
             .ioctl()
             .build();
 
     fn open() -> KernelResult<Self> {
-        return Ok(IoDeviceFile);
+        info!("open called");
+        return Ok(IoDeviceFile{});
     }
 }
-
-/// 用于测试的静态变量
-static mut counter: i32 = 0;
 
 /// 对用户空间的iotcl调用做出反应
 impl fops::Ioctl for IoDeviceFile {
     fn ioctl(&self, cmd:u32, arg: u64) -> KernelResult<i64> {
-        unsafe{
-            counter += 1;
-            info!(": cmd={}, arg={} counter={}", cmd, arg, counter);
+        info!("ioctl cmd={} arg={}", cmd, arg);
+        let mut container = Container::get_container();
+        let cmd = IoctlCmd::try_from(cmd)?;
+        match cmd {
+            IoctlCmd::Create => {
+                let path_str = string::read_from_user(arg, kernel::PATH_MAX)?;
+                container.init(path_str)?;
+                Ok(0)
+            }
+            IoctlCmd::AddProc => {
+                container.add_task(arg as i32)?;
+                Ok(0)
+            }
+            IoctlCmd::Remove => {
+                container.remove_task(arg as i32)?;
+                Ok(0)
+            }
         }
-        return Ok(0);
+
     }
 }

@@ -7,10 +7,11 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/types.h>
-// #include <linux/syscalls.h>
+#include <linux/syscalls.h>
 #include <linux/delay.h>
 #include <linux/sched.h>
 #include <linux/version.h>
+#include <linux/uaccess.h>
 #include <linux/kallsyms.h>
 #include <linux/semaphore.h>
 #include <asm/cacheflush.h>
@@ -38,6 +39,8 @@ inline void restore_wp ( unsigned long cr0 ) {
     barrier();
     // preempt_enable_no_resched(); // 释放内核控制
 }
+
+
 
 void **syscall_table = 0;
 
@@ -98,4 +101,28 @@ int replace_clear() {
     }
     restore_wp(cr0);
     return 0;
+}
+
+mm_segment_t  protect_fs() {\
+    mm_segment_t oldfs;
+    oldfs=get_fs();
+    set_fs(KERNEL_DS);
+    return oldfs;
+}
+
+void  release_fs(mm_segment_t oldfs) {
+    set_fs(oldfs);
+}
+
+unsigned long user_max() {
+    return user_addr_max();
+}
+
+int read_to(unsigned long p){
+    char c;
+    return __get_user(c , (const char *)p);
+}
+
+int strncpy_from_user2(char * dst, const char * src, unsigned long max) {
+    return strncpy_from_user(dst, src, max);
 }

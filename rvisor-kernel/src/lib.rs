@@ -25,11 +25,7 @@
 //! 
 
 #![no_std]
-
 extern crate alloc;
-
-use alloc::borrow::ToOwned;
-use alloc::string::String;
 
 use linux_kernel_module;
 use linux_kernel_module::c_types::*;
@@ -40,9 +36,11 @@ use linux_kernel_module::cstr;
 /// logger for this crate
 #[macro_use]
 pub mod log;
-mod hook;
-mod iodev;
-
+pub mod hook;
+pub mod iodev;
+pub mod kernel;
+pub mod container;
+pub mod string;
 
 /// it contains kernel varible
 /// 
@@ -50,6 +48,7 @@ mod iodev;
 struct RVisorModule {
     /// chrdev_registration: 为linux增加一个主设备号，可以用mknod获得设备文件。
     chrdev_registration: chrdev::Registration,
+    
 }
 
 /// impl kernel init function here
@@ -57,6 +56,7 @@ impl linux_kernel_module::KernelModule for RVisorModule {
     /// kernel init function
     fn init() -> linux_kernel_module::KernelResult<Self> {
         info!(": module init");
+        
         hook::init();
         
         // 登记设备名，和设备文件struct

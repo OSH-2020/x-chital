@@ -1,3 +1,6 @@
+//! 系统调用挂钩的模块
+//! 
+
 use linux_kernel_module::bindings;
 use linux_kernel_module::c_types::*;
 use linux_kernel_module::println;
@@ -11,6 +14,8 @@ extern "C" {
     fn replace_syscall(sysnum : c_uint, f_ptr : *const()) -> c_int;
     /// recover the replace
     fn replace_clear() -> c_int;
+
+    pub fn user_max() -> u64;
 }
 /// replace_syscall 的安全包装
 fn safe_replace_syscall(sysnum : c_uint, f_ptr : *const()) {
@@ -30,6 +35,7 @@ pub fn init() {
         }
     }
     safe_replace_syscall(bindings::__NR_open, syscall::rvisor_open as *const());
+    safe_replace_syscall(bindings::__NR_openat, syscall::rvisor_openat as *const());
 }
 
 /// 退出的时候调用
@@ -40,3 +46,4 @@ pub fn cleanup() {
         }
     }
 }
+

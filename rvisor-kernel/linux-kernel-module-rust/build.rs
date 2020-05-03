@@ -8,7 +8,17 @@ use std::process::Command;
 use std::{env, fs};
 use glob::glob;
 
-const INCLUDED_TYPES: &[&str] = &["file_system_type", "mode_t", "umode_t", "ctl_table", "mm_segment_t", "pid_t"];
+const INCLUDED_TYPES: &[&str] = &[
+    "file_system_type",
+    "mode_t",
+    "umode_t",
+    "ctl_table",
+    "mm_segment_t",
+    "pid_t",
+    "dentry",
+    "path",
+    "file",
+];
 const INCLUDED_FUNCTIONS: &[&str] = &[
     "cdev_add",
     "cdev_init",
@@ -30,9 +40,6 @@ const INCLUDED_FUNCTIONS: &[&str] = &[
     "get_random_bytes",
     "rng_is_initialized",
     "strncpy_from_user",
-    "set_fs",
-    "get_fs",
-    "get_ds"
 ];
 const INCLUDED_VARS: &[&str] = &[
     "EINVAL",
@@ -54,6 +61,7 @@ const INCLUDED_VARS: &[&str] = &[
     "SEEK_CUR",
     "SEEK_END",
     "__NR_open",
+    "__NR_openat",
     "__NR_getpid"
 ];
 const OPAQUE_TYPES: &[&str] = &[
@@ -198,6 +206,14 @@ fn main() {
     builder.flag("-mfentry");
     builder.compile("helpers");
 } 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
  
  
