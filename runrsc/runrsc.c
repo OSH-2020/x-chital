@@ -276,8 +276,6 @@ int send_to_boot(char *message)
     return 0;
 }
 
-
-
 int execute(char *path){
     pid_t pid;
     pid = fork();
@@ -331,6 +329,8 @@ int main(int argc, char **argv) {
         //send_to_boot("0\n");
         if (!argv[2]) {
             perror("Exec Error: expect guest path.");
+
+            
         }
         else {
             execute(argv[2]);
