@@ -9,3 +9,4 @@ crate-type = ["staticlib"]
 
 [dependencies]
 linux-kernel-module = { path = "./linux-kernel-module-rust" }
+spin = "0.5.2"

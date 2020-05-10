@@ -37,6 +37,7 @@ inline unsigned long disable_wp ( void ) {
 inline void restore_wp ( unsigned long cr0 ) {
     write_cr0(cr0);
     barrier();
+    preempt_enable_no_resched();
     // preempt_enable_no_resched(); // 释放内核控制
 }
 

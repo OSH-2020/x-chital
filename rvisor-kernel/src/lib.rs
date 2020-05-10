@@ -26,6 +26,8 @@
 
 #![no_std]
 extern crate alloc;
+#![no_std]
+extern crate spin;
 
 use linux_kernel_module;
 use linux_kernel_module::c_types::*;

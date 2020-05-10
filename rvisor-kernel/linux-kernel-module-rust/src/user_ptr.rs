@@ -60,7 +60,12 @@ impl UserSlicePtr {
         }
         Ok(UserSlicePtr(ptr, length))
     }
-
+    #[inline(always)]
+    pub fn new_ptr(ptr: u64, length: usize) -> error::KernelResult<UserSlicePtr> {
+        unsafe{
+            UserSlicePtr::new(ptr as *mut c_types::c_void, length)
+        }
+    }
     /// Read the entirety of the user slice and return it in a `Vec`.
     ///
     /// Returns EFAULT if the address does not currently point to

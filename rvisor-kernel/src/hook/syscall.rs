@@ -90,14 +90,14 @@ kernel_syscall!(
 
 kernel_syscall!(
     orig_getcwd, safe_getcwd, rvisor_getcwd, {
-        |k| k.getcwd()
-    },  , u64, envp, u64
+        |k| k.getcwd(buf, size)
+    }, buf , u64, size, u64
 );
 
 kernel_syscall!(
     orig_chdir, safe_chdir, rvisor_chdir, {
-        |k| k.execve(filename, argv, envp)
-    }, filename, * const u8, argv , u64, envp, u64
+        |k| k.chdir(filename)
+    }, filename, u64
 );
 
 macro_rules! normal_syscall{
@@ -137,7 +137,7 @@ normal_syscall!(
         let i = unsafe {orig_fork()};
         if i > 0 {container.add_task(i as i32);}
         i
-    }
+    },
 );
 
 normal_syscall!(
@@ -147,51 +147,47 @@ normal_syscall!(
         let i = unsafe {orig_vfork()};
         if i > 0 {container.add_task(i as i32);}
         i
-    }
+    },
 );
 
-normal_syscall!(
-    orig_vfork, safe_vfork, rvisor_vfork, {
-        info!("vfork: called inside container");
-        let container = Container::get_container();
-        let i = unsafe {orig_vfork()};
-        if i > 0 {container.add_task(i as i32);}
-        i
-    }
-);
+// kernel_syscall!(
+//     orig_mknodat, safe_mknodat, rvisor_mknodat, {
 
-// pub extern "C" fn rvisor_clone() -> i64 {
-//     let container = Container::get_container();
-//     if container.contains(get_pid()) {
+//     }, dfd, u64, filename, u64, mode, u64, dev, u64
+// );
 
-//     } else {
-//         unsafe {
-//             orig_clone(flags, newsp, ptidptr, ctidptr, tls)
-//         }
-//     }
-// }
+// kernel_syscall!(
+//     orig_mknod, safe_mknod, rvisor_mknod, {
 
-// /// 重写的open系统调用。
-// pub extern "C" fn rvisor_open(filename: * const u8, flags : c_int, mode : bindings::umode_t) -> i64 {
-//     let ret = i32_syscall(
-//         |k| k.open(filename, flags, mode)
-//     )
-//     if ret == None {
-//         unsafe {orig_open(filename, flags, mode)}
-//     } else {ret}
-// }
+//     }, filename, u64, mode, u64, dev, u64
+// );
 
-// pub extern "C" fn rvisor_openat(f : u64, filename: * const u8, flags : c_int, mode : bindings::umode_t) -> i64 {
-//     let container = Container::get_container();
-//     if container.contains(get_pid()) {
-//         return_result(
-//             container.runk_mut(|k|{
-//                 k.open(filename, flags, mode)
-//             }).unwrap()
-//         )
-//     } else {
-//         unsafe {
-//             orig_openat(f, filename, flags, mode)
-//         }
-//     }
-// }
+// kernel_syscall!(
+//     orig_mkdirat, safe_mkdirat, rvisor_mkdirat, {
+        
+//     }, dfd, u64, filename, u64, mode, u64
+// );
+
+// kernel_syscall!(
+//     orig_mkdir, safe_mkdir, rvisor_mkdir, {
+
+//     }, filename, u64, mode, u64
+// );
+
+// kernel_syscall!(
+//     orig_rmdir, safe_rmdirat, rvisor_rmdirat, {
+
+//     }, filename, u64
+// );
+
+// kernel_syscall!(
+//     orig_stat, safe_stat, rvisor_stat, {
+
+//     }, filename, u64, statbuf, u64
+// );
+
+// kernel_syscall!(
+//     orig_lstat, safe_lstat, rvisor_lstat, {
+
+//     }, filename, u64, statbuf, u64
+// );

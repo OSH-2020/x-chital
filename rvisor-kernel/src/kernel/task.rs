@@ -13,7 +13,7 @@ impl Task {
     pub fn new(pid : i32) -> Task {
         Task{
             pid : pid,
-            cwd : Vec<String>,
+            cwd : Vec::new(),
         }
     }
 }

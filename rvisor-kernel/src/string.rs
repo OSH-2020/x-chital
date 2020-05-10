@@ -1,5 +1,6 @@
 use linux_kernel_module::KernelResult;
 use linux_kernel_module::bindings;
+use linux_kernel_module::user_ptr::UserSlicePtr;
 use linux_kernel_module::Error;
 use crate::container::Container;
 
@@ -12,7 +13,7 @@ extern "C" {
 
 pub fn read_from_user(user_ptr : u64, max_length : usize) -> KernelResult<String> {
     info!("read_from_user");
-    let mut ret = String::from("                                                                                 ");
+    let mut ret = String::from("                                                                                                                             ");
     unsafe {
         let slice = ret.as_mut_str();
         let i = strncpy_from_user2(slice.as_mut_ptr(), user_ptr as *const u8, max_length as u64);
@@ -24,5 +25,11 @@ pub fn read_from_user(user_ptr : u64, max_length : usize) -> KernelResult<String
     }
     info!("read_from_user: {}", ret);
     Ok(ret)
+}
+
+pub fn write_to_user(user_ptr : u64, max_length : usize, mut src : String) -> KernelResult<()> {
+    let uptr = UserSlicePtr::new_ptr(user_ptr, max_length)?;
+    uptr.write_all(src.as_bytes())?;
+    Ok(())
 }
 

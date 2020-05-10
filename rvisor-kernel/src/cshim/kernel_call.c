@@ -84,3 +84,15 @@ SYSCALL_EXPORT5(execveat,
 		const char __user *const __user *, argv,
 		const char __user *const __user *, envp,
 		int, flags)
+
+
+SYSCALL_EXPORT1(chdir, const char __user *, filename)
+SYSCALL_EXPORT2(getcwd, char __user *, buf, unsigned long, size)
+
+SYSCALL_EXPORT4(mknodat, int, dfd, const char __user *, filename, umode_t, mode, unsigned int, dev)
+SYSCALL_EXPORT3(mknod, const char __user *, filename, umode_t, mode, unsigned, dev)
+SYSCALL_EXPORT3(mkdirat, int, dfd, const char __user *, pathname, umode_t, mode)
+SYSCALL_EXPORT2(mkdir, const char __user *, pathname, umode_t, mode)
+SYSCALL_EXPORT1(rmdir, const char __user *, pathname)
+SYSCALL_EXPORT2(stat, const char __user *, filename, struct __old_kernel_stat __user *, statbuf)
+SYSCALL_EXPORT2(lstat, const char __user *, filename, struct __old_kernel_stat __user *, statbuf)

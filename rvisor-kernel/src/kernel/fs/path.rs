@@ -1,5 +1,4 @@
 
-use crate::kernel::Kernel;
 use linux_kernel_module as lkm;
 use lkm::KernelResult;
 use lkm::Error;
@@ -9,6 +8,35 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+use crate::kernel::Kernel;
+use crate::kernel::task::Task;
+use crate::string;
+
+impl Task {
+    #[inline(always)]
+    pub fn get_cwd(&self, ret : &mut String) {
+        for ref p in &self.cwd {
+            ret.push('/');
+            ret.push_str(p.as_str());
+        }
+    }
+
+    pub fn chdir(&mut self, path : &String) -> KernelResult<()> {
+        for entry in path.split("/") {
+            match entry {
+                ".." => {
+                    if self.cwd.pop() == None {
+                        return Err(Error::EINVAL);
+                    }
+                }
+                "." => (),
+                "" => (),
+                _ => {self.cwd.push(String::from(entry));}
+            }
+        }
+        Ok(())
+    }
+}
 
 impl Kernel {
     pub fn guest_to_host(&self, guest_path : &String) -> KernelResult<String> {
@@ -19,12 +47,19 @@ impl Kernel {
             info!("kernel path: root path found");
             Ok(self.path_convert(guest_path, false)?)
         } else {
-            Err(Error::EFAULT)
+            Ok(self.path_convert(guest_path, true)?)
         }
     }
 
     fn path_convert(&self, guest_path : &String, relative : bool) -> KernelResult<String> {
-        let mut stack : Vec<&str> = Vec::with_capacity(10);
+        let mut stack : Vec<&str> = Vec::with_capacity(20);
+        if relative {
+            if let Some(ref cur) = self.current{
+                for ref p in &cur.cwd {
+                    stack.push(& p.as_str());
+                }
+            }
+        }
         for entry in guest_path.split("/") {
             match entry {
                 ".." => {
@@ -41,11 +76,6 @@ impl Kernel {
 
         let mut ret = String::with_capacity(80);
         ret.push_str(self.rootpath.as_str());
-        if relative {
-            if let Some(ref cur) = self.current{
-                ret.push_str(cur.cwdpath.as_str());
-            }
-        }
         for entry in &stack {
             ret.push('/');
             ret.push_str(entry);
