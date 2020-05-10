@@ -79,7 +79,7 @@ kernel_syscall!(
 kernel_syscall!(
     orig_openat, safe_openat, rvisor_openat, {
         |k| k.open(filename, flags, mode)
-    }, f, u64, filename, * const u8, flags , c_int, mode , bindings::umode_t
+    }, f, u64, filename, * const u8, flags ,  c_int, mode , bindings::umode_t
 );
 
 kernel_syscall!(
@@ -138,7 +138,7 @@ normal_syscall!(
         if i > 0 {container.add_task(i as i32);}
         i
     },
-);
+); 
 
 normal_syscall!(
     orig_vfork, safe_vfork, rvisor_vfork, {
@@ -150,13 +150,13 @@ normal_syscall!(
     },
 );
 
-//kernel_syscall!(
+// kernel_syscall!(
 //  orig_mknodat, safe_mknodat, rvisor_mknodat, {
  
 //  }, dfd, u64, filename, u64, mode, u64, dev, u64
 //);
  
-//kernel_syscall!(
+// kernel_syscall!(
 //   orig_mknod, safe_mknod, rvisor_mknod, {
  
 //     }, filename, u64, mode, u64, dev, u64
@@ -168,13 +168,13 @@ normal_syscall!(
 //     }, dfd, u64, filename, u64, mode, u64
 // );
 
-// kernel_syscall!(
+//  kernel_syscall!(
 //     orig_mkdir, safe_mkdir, rvisor_mkdir, {
 
 //     }, filename, u64, mode, u64
 // );
 
-// kernel_syscall!(
+//  kernel_syscall!(
 //     orig_rmdir, safe_rmdirat, rvisor_rmdirat, {
 
 //     }, filename, u64
