@@ -51,19 +51,19 @@ fn i32_syscall<F>(f : F) -> Option<i64>
     ))
 }
 macro_rules! kernel_syscall{
-    ($orig:ident, $safe:ident,$name:ident, $p:expr, $($arg:ident, $type:ty),*) => {
-        extern "C" {
-            pub fn $orig($($arg : $type,)*) -> i64;
+    ($orig:ident, $safe:ident,$name:ident, $p:expr, $($arg:ident, $type:ty),*) => { 
+        extern "C" { 
+            pub fn $orig($($arg : $type,)*) -> i64; 
         }
         #[inline(always)]
         pub fn $safe($($arg : $type,)*) -> i64 {
             protect_fs_run(|| unsafe{$orig($($arg),*)})
         }
         pub extern "C" fn $name($($arg : $type,)*) -> i64 {
-            let ret = i32_syscall(
-                $p
+            let ret = i32_syscall( 
+                $p 
             );
-            if let Some(r) = ret {r }
+            if let Some(r) = ret {r } 
             else {
                 unsafe {$orig($($arg),*)}
             }
@@ -74,7 +74,7 @@ macro_rules! kernel_syscall{
 kernel_syscall!(
     orig_open, safe_open, rvisor_open,{
         |k| k.open(filename, flags, mode)
-    }, filename, * const u8, flags , c_int, mode , bindings::umode_t
+    }, filename, * const u8, flags  , c_int, mode , bindings::umode_t
 );
 kernel_syscall!(
     orig_openat, safe_openat, rvisor_openat, {
