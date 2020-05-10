@@ -71,7 +71,7 @@ impl linux_kernel_module::KernelModule for RVisorModule {
             chrdev_registration: _chrdev_registration,
         })
     }
-}
+} 
 
 /// impl kernel clean up function here
 impl Drop for RVisorModule {

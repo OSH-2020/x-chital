@@ -150,19 +150,19 @@ normal_syscall!(
     },
 );
 
-// kernel_syscall!(
-//     orig_mknodat, safe_mknodat, rvisor_mknodat, {
-
-//     }, dfd, u64, filename, u64, mode, u64, dev, u64
-// );
-
-// kernel_syscall!(
-//     orig_mknod, safe_mknod, rvisor_mknod, {
-
+//kernel_syscall!(
+//  orig_mknodat, safe_mknodat, rvisor_mknodat, {
+ 
+//  }, dfd, u64, filename, u64, mode, u64, dev, u64
+//);
+ 
+//kernel_syscall!(
+//   orig_mknod, safe_mknod, rvisor_mknod, {
+ 
 //     }, filename, u64, mode, u64, dev, u64
 // );
 
-// kernel_syscall!(
+//  kernel_syscall!(
 //     orig_mkdirat, safe_mkdirat, rvisor_mkdirat, {
         
 //     }, dfd, u64, filename, u64, mode, u64
