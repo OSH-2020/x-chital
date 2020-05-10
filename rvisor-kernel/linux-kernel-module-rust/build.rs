@@ -11,7 +11,7 @@ use glob::glob;
 const INCLUDED_TYPES: &[&str] = &[
     "file_system_type",
     "mode_t",
-    "umode_t",
+    "umode_t", 
     "ctl_table",
     "mm_segment_t",
     "pid_t",
@@ -62,7 +62,10 @@ const INCLUDED_VARS: &[&str] = &[
     "SEEK_END",
     "__NR_open",
     "__NR_openat",
-    "__NR_getpid"
+    "__NR_getpid",
+    "__NR_execve",
+    "__NR_clone",
+    "__NR_*"
 ];
 const OPAQUE_TYPES: &[&str] = &[
     // These need to be opaque because they're both packed and aligned, which rustc
@@ -206,6 +209,8 @@ fn main() {
     builder.flag("-mfentry");
     builder.compile("helpers");
 } 
+ 
+ 
  
  
  

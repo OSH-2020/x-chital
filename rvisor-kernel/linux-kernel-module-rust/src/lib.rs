@@ -140,6 +140,7 @@ extern "C" {
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
+    println!("{:?}", _info);
     unsafe {
         bug_helper();
     }

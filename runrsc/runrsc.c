@@ -12,7 +12,18 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
-#define PORT 1211
+
+#define PORT 1253
+#define RVISOR_CREATE 0
+#define RVISOR_ADD_PROC 1
+#define RVISOR_REMOVE_PROC 2
+
+/* To test:
+
+You can use "/home/hardyho/test". It prints "test..." every 10 secs.
+
+*/
+
 
 /* TODO: 
 
@@ -30,9 +41,6 @@ Socket cannot handle the situation where the pid exit. Maybe could be handled if
 /*PROBLEMS: 
 
 The PORT is settled. Sometimes(unpredictable) need to switch the PORT and compile it again before you run it.
-
-SHUTDOWN doesn't work yet!! In function execute(), wish it could be possible to use execvp() to run a new progress, instead of system(). (Otherwise the pid will change and `kill` won't be useful.)
-However, there may be error like: error while loading shared libraries: libc.so.6: cannot open shared object file: No such file or directory. 
 
 */
 
@@ -52,6 +60,9 @@ Check more about the function related to kernel-module. Don't know that part too
 
 */
 
+
+
+
 int boot_pid;  // for `shutdown` to kill the boot.(required or not?)
 
 struct pid_node{
@@ -61,7 +72,7 @@ struct pid_node{
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int pid_alive(int pid){
-    //A trick, may be better way 
+    //Just a trick, may be better way 
     //if pid is alive, return 1
     //else return 0
     char cmd[64];
@@ -113,11 +124,14 @@ int killall(){
     struct pid_node *temp, *temp1;
     int pid;
     char cmd[20];
+    int fd = open("/dev/rvisor", O_RDWR);
+    if (fd == -1) perror("Kill, rvisor");
     for(temp = head; temp->next; temp = temp->next){
         pid = temp->next->pid;
-        if (pid_alive(pid)) {      
+        if (pid_alive(pid)) {  
+            ioctl(fd, RVISOR_REMOVE_PROC, pid); 
             sprintf(cmd, "kill -9 %d", pid);
-            printf("cmd:%s\n",cmd);
+            //printf("cmd:%s\n",cmd);
             system(cmd);
             printf("%d has been killed.\n",pid);
         }
@@ -134,20 +148,20 @@ int killall(){
 
 int create(char *path){
     system("dmesg --clear");
-    //system("rmmod ../rvisor-kernel/rvisor");
+    system("rmmod rvisor");    // RESPOSE: your syntax error!
     //  problem with 'rmmod'.
-    system("insmod ../rvisor-kernel/rvisor.ko");
+    int suc = system("insmod ../rvisor-kernel/rvisor.ko");
+    if(suc != 0) { printf("insmod failed!\n"); exit(1);}
+
     system("mknod --mode=a=rw /dev/rvisor c $(cat /proc/devices | grep rvisor | awk '{print $1}') 0");
     int fd = open("/dev/rvisor", O_RDWR);
-    if (fd < 0) {
-        perror("Create Error");
-        return 0;
-    }
-    int r = ioctl(fd, 0, path);
+    if (fd == -1) perror("Create, rvisor");
+    int r = ioctl(fd, RVISOR_CREATE, path);
     if (r < 0) {
-        perror("Create Error");
+        perror("Create, rvisor");
         return 0;
     }
+    close(fd);
 }
 
 void *handler(void *data){
@@ -270,7 +284,7 @@ int execute(char *path){
     if(pid == 0){
         sleep(1);
         char buffer[15];
-        printf("pid = %d\n",getpid());
+        printf("son process = %d\n",getpid());
         sprintf(buffer,"%09d \n",getpid());
         send_to_boot(buffer);
         char *args[2]; 
@@ -278,17 +292,23 @@ int execute(char *path){
         args[1] = NULL;
 
         /* should use execvp(), but there's a bug*/
-
-        system(path);
-        //execvp(args[0], args); 
+        sleep(0.5);
+        //system(path);
+        execvp(args[0], args);
+        perror("execvp");
         exit(0);
     }
     else{
+        //printf("father process = %d\n",getpid());
         int fd = open("/dev/rvisor", O_RDWR);
-        if (fd == -1) perror("rvisor");
-        printf("Success? %d\n",ioctl(fd, 1, pid));
+        if (fd == -1) perror("Execute, rvisor");
+        ioctl(fd, RVISOR_ADD_PROC, pid);
+
+        int i;
+        wait(&i);
+        close(fd);
         exit(0);
-    }  
+    }
 }
 
 
@@ -321,8 +341,10 @@ int main(int argc, char **argv) {
     }
     if (strcmp(argv[1], "ps") == 0){
         send_to_boot("ps\n");
+        sleep(1); //so that output won't be disturbed by shell
     } 
     if (strcmp(argv[1], "shutdown") == 0){
         send_to_boot("shutdown\n");
+        sleep(1);
     }
 }

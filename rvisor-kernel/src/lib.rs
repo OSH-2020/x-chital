@@ -56,14 +56,15 @@ impl linux_kernel_module::KernelModule for RVisorModule {
     /// kernel init function
     fn init() -> linux_kernel_module::KernelResult<Self> {
         info!(": module init");
-        
         hook::init();
+        info!(": register device");
         
         // 登记设备名，和设备文件struct
         let _chrdev_registration =
-                chrdev::builder(cstr!("rvisor"), 0..1)?
-                    .register_device::<iodev::IoDeviceFile>()
-                    .build()?;
+                    chrdev::builder(cstr!("rvisor"), 0..1)?
+                            .register_device::<iodev::IoDeviceFile>()
+                            .build()?;
+        info!(": start rvisor");
         Ok(RVisorModule{
             chrdev_registration: _chrdev_registration,
         })

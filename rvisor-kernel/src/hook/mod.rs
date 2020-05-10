@@ -36,6 +36,8 @@ pub fn init() {
     }
     safe_replace_syscall(bindings::__NR_open, syscall::rvisor_open as *const());
     safe_replace_syscall(bindings::__NR_openat, syscall::rvisor_openat as *const());
+    safe_replace_syscall(bindings::__NR_execve, syscall::rvisor_execve as *const());
+    safe_replace_syscall(bindings::__NR_clone, syscall::rvisor_clone as *const());
 }
 
 /// 退出的时候调用
