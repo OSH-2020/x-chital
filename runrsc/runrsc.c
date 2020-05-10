@@ -238,9 +238,9 @@ int boot(){
                 printf("%d connected.\n",fd_temp);
                 fd_clients[i] = fd_temp;
                 pthread_create(&thread[i], NULL, handler, (void *)&fd_clients[i]); //Create a thread to handle it
-                pthread_detach(thread[i]);
-                client_num++;
-                i++;
+                pthread_detach(thread[i]); 
+                client_num++; 
+                i++; 
             }
             else{
                 perror("accept");
@@ -330,7 +330,7 @@ int main(int argc, char **argv) {
         if (!argv[2]) {
             perror("Exec Error: expect guest path.");
 
-            
+
         }
         else {
             execute(argv[2]);
