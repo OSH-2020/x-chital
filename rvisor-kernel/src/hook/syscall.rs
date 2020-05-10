@@ -88,6 +88,18 @@ kernel_syscall!(
     }, filename, * const u8, argv , u64, envp, u64
 );
 
+kernel_syscall!(
+    orig_getcwd, safe_getcwd, rvisor_getcwd, {
+        |k| k.getcwd()
+    },  , u64, envp, u64
+);
+
+kernel_syscall!(
+    orig_chdir, safe_chdir, rvisor_chdir, {
+        |k| k.execve(filename, argv, envp)
+    }, filename, * const u8, argv , u64, envp, u64
+);
+
 macro_rules! normal_syscall{
     ($orig:ident, $safe:ident, $name:ident, $p:expr, $($arg:ident, $type:ty),*) => {
         extern "C" {
@@ -123,6 +135,16 @@ normal_syscall!(
         info!("fork: called inside container");
         let container = Container::get_container();
         let i = unsafe {orig_fork()};
+        if i > 0 {container.add_task(i as i32);}
+        i
+    }
+);
+
+normal_syscall!(
+    orig_vfork, safe_vfork, rvisor_vfork, {
+        info!("vfork: called inside container");
+        let container = Container::get_container();
+        let i = unsafe {orig_vfork()};
         if i > 0 {container.add_task(i as i32);}
         i
     }

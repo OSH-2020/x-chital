@@ -44,7 +44,7 @@ impl Kernel {
         self.tasks.remove(&pid);
         Ok(())
     }
-
+ 
     #[inline(always)]
     pub fn try_set_current(&mut self, pid : i32) -> bool {
         if let Some(t) = self.tasks.get(&pid) {
