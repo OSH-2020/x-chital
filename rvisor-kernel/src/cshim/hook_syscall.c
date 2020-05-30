@@ -81,9 +81,10 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
     }
     printk(KERN_DEBUG "rvisor-kernel replace_syscall: Found the sys_call_table at %16lx.\n", (unsigned long) syscall_table);
 
-    cr0 = disable_wp();
-    syscall_table[syscall_num] = syscall_fn;
-    restore_wp(cr0);
+    cr0 = disable_wp(); // 关闭内存写保护
+    syscall_table[syscall_num] = syscall_fn; // 替换相应的系统调用
+    restore_wp(cr0); // 恢复内存写保护
+    
     return 0;
 }
 
@@ -98,7 +99,7 @@ int replace_clear() {
 
     cr0 = disable_wp();
     for(i = 0; i < SYSCALL_TABLE_LENGTH; i++) {
-        syscall_table[i] = saved_syscall_table[i]; // yes, copy the content.
+        syscall_table[i] = saved_syscall_table[i];
     }
     restore_wp(cr0);
     return 0;
