@@ -65,7 +65,13 @@ const INCLUDED_VARS: &[&str] = &[
     "__NR_getpid",
     "__NR_execve",
     "__NR_clone",
-    "__NR_*"
+    "__NR_vfork",
+    "__NR_fork",
+    "__NR_clone",
+    "__NR_getcwd",
+    "__NR_chdir",
+    "__NR_stat",
+    "__NR_lstat",
 ];
 const OPAQUE_TYPES: &[&str] = &[
     // These need to be opaque because they're both packed and aligned, which rustc
@@ -209,6 +215,10 @@ fn main() {
     builder.flag("-mfentry");
     builder.compile("helpers");
 } 
+ 
+ 
+ 
+ 
  
  
  

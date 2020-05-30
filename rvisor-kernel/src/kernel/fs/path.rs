@@ -15,13 +15,23 @@ use crate::string;
 impl Task {
     #[inline(always)]
     pub fn get_cwd(&self, ret : &mut String) {
-        for ref p in &self.cwd {
+        if self.cwd.len() == 0 {
             ret.push('/');
-            ret.push_str(p.as_str());
+        } else {
+            for ref p in &self.cwd {
+                ret.push('/');
+                ret.push_str(p.as_str());
+            }
         }
     }
 
     pub fn chdir(&mut self, path : &String) -> KernelResult<()> {
+        if path == "" {
+            return Err(Error::EINVAL)
+        }
+        if &path[0..1] == "/" {
+            self.cwd.clear();
+        }
         for entry in path.split("/") {
             match entry {
                 ".." => {
@@ -51,15 +61,38 @@ impl Kernel {
         }
     }
 
+    pub fn relative_to_absolute(&self, guest_path : &String) -> KernelResult<String>{
+        if let Some(ref cur) = self.current {
+            let mut stack : Vec<&str> = Vec::with_capacity(20);
+            let data = cur.lock();
+            for ref p in &data.cwd {
+                stack.push(& p.as_str());
+            }
+            self.guest_to_host_with_stack(&stack)
+        } else {
+            Err(Error::EINVAL)
+        }
+    }
+
     fn path_convert(&self, guest_path : &String, relative : bool) -> KernelResult<String> {
         let mut stack : Vec<&str> = Vec::with_capacity(20);
-        if relative {
-            if let Some(ref cur) = self.current{
-                for ref p in &cur.cwd {
+        if relative{
+            if let Some(ref cur) = self.current {
+                let data = cur.lock();
+                for ref p in &data.cwd {
                     stack.push(& p.as_str());
                 }
+                self.build_stack(guest_path, &mut stack)?;
+                self.guest_to_host_with_stack(&stack)
+            } else {
+                Err(Error::EINVAL)
             }
+        } else {
+            self.build_stack(guest_path, &mut stack)?;
+            self.guest_to_host_with_stack(&stack)
         }
+    }
+    fn build_stack<'a>(&self, guest_path : &'a String, stack : &mut Vec<&'a str>) -> KernelResult<()> {
         for entry in guest_path.split("/") {
             match entry {
                 ".." => {
@@ -72,11 +105,12 @@ impl Kernel {
                 _ => {stack.push(entry);}
             }
         }
-        // info!("kernel path : {:?}", stack);
-
+        Ok(())
+    }
+    fn guest_to_host_with_stack(&self, stack : &Vec<&str>) -> KernelResult<String> {
         let mut ret = String::with_capacity(80);
         ret.push_str(self.rootpath.as_str());
-        for entry in &stack {
+        for entry in stack {
             ret.push('/');
             ret.push_str(entry);
         }

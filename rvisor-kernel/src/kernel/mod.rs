@@ -4,7 +4,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::collections::btree_map::BTreeMap;
-use alloc::rc::Rc;
+use alloc::sync::Arc;
+use spin::Mutex;
 
 pub const PATH_MAX : usize = 200;
 
@@ -13,8 +14,8 @@ use task::Task;
 
 pub struct Kernel {
     rootpath : String,
-    tasks : BTreeMap<i32, Rc<Task>>,
-    current : Option<Rc<Task>>,
+    tasks : BTreeMap<i32, Arc<Mutex<Task>>>,
+    current : Option<Arc<Mutex<Task>>>,
 }
 
 impl Kernel {
@@ -28,19 +29,41 @@ impl Kernel {
 
     #[inline(always)]
     pub fn add_task(&mut self, pid : i32) -> KernelResult<()> {
-        self.tasks.insert(pid, Rc::new(
-            Task::new(pid)
-        ));
+        info!("pid {} added", pid);
+        self.tasks.insert(pid,
+            Arc::new(
+                Mutex::new(
+                    Task::new(pid)
+                )
+            )
+        );
         Ok(())
     }
 
     #[inline(always)]
+    pub fn clone_task(&mut self, pid : i32, fpid : i32) -> KernelResult<()> {
+        info!("pid {} added", pid);
+        if pid != 0 {
+            self.tasks.insert(pid,
+                Arc::new(
+                    Mutex::new({
+                        let data = self.tasks[&fpid].lock();
+                        data.clone(pid)
+                    })
+                )
+            );
+        }
+        Ok(())
+    }
+    
+    #[inline(always)]
     pub fn contains(&self, pid : i32) -> bool {
         self.tasks.contains_key(&pid)
     }
-
+    
     #[inline(always)]
     pub fn remove_task(&mut self, pid : i32) -> KernelResult<()> {
+        info!("pid {} removed", pid);
         self.tasks.remove(&pid);
         Ok(())
     }

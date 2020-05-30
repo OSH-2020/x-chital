@@ -8,6 +8,7 @@ int main(){
     // int i = open("/hello.c", O_RDONLY);
     char buf[200];
     getcwd(buf, 200);
-    printf("%s", buf);
+    printf("%s\n", buf);
+    printf("%d\n", i);
     exit(0);
 }

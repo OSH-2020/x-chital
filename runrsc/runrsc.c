@@ -13,53 +13,21 @@
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 
-#define PORT 1253
+#define PORT 12290
 #define RVISOR_CREATE 0
 #define RVISOR_ADD_PROC 1
 #define RVISOR_REMOVE_PROC 2
 
-/* To test:
-
-You can use "/home/hardyho/test". It prints "test..." every 10 secs.
-
-*/
-
 
 /* TODO: 
 
-pthread_mutex_lock should be setted when operations about the linked list are done. Not set yet.
-
 Usage could be provided in the future.
 
-Socket cannot handle the situation where the pid exit. Maybe could be handled if we send message from the boot to clients every certain time. 
+Socket can only handle limited numbers of instructions.(100 instructions)
 
 `ps`: Info is provided by boot, instead of `ps`.  Based on an assumption that the whole runrsc is run in ONE shell. Could be improved if we want to run it in different shell  
 
 */
-
-
-/*PROBLEMS: 
-
-The PORT is settled. Sometimes(unpredictable) need to switch the PORT and compile it again before you run it.
-
-*/
-
-
-/*NEED HELP:
-
-Is `rmmod` required or not? Seems that there's a problem related to kernel-module when running rmmod in this program.
-
-In result of the absence of `rmmod`, when running `create`:
-```
-insmod: ERROR: could not insert module ../rvisor-kernel/rvisor.ko: File exists
-mknod: /dev/rvisor: File exists
-```
-Are these acceptable?
-
-Check more about the function related to kernel-module. Don't know that part too much so that the debugging isn't mainly focus on that part.
-
-*/
-
 
 
 
@@ -144,13 +112,14 @@ int killall(){
     }
     sprintf(cmd, "kill -9 %d", boot_pid); //Kill boot?
     system(cmd);
+    rmdir("/sys/fs/cgroup/memory/rvisor");
 }
 
 int create(char *path){
     system("dmesg --clear");
     system("rmmod rvisor");    // RESPOSE: your syntax error!
     //  problem with 'rmmod'.
-    int suc = system("insmod ../rvisor-kernel/rvisor.ko");
+    int suc = system("insmod /home/share/x-chital/rvisor-kernel/rvisor.ko");
     if(suc != 0) { printf("insmod failed!\n"); exit(1);}
 
     system("mknod --mode=a=rw /dev/rvisor c $(cat /proc/devices | grep rvisor | awk '{print $1}') 0");
@@ -188,11 +157,11 @@ void *handler(void *data){
         printf("pid = %d\n",pid);
         struct pid_node *temp;
         temp = malloc(sizeof(struct pid_node));
-        //pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
         temp->pid = pid;
         temp->next = head->next;
         head->next = temp;
-        //pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
     }
     close(*client_id);
     return NULL;
@@ -210,6 +179,28 @@ int boot(){
     int fd, fd_temp;
     printf("boot!\n");
     boot_pid = getpid();
+    FILE *fp;
+
+
+    //cgroup   limit in memory
+    mkdir("/sys/fs/cgroup/memory/rvisor", 0777);
+    if ((fp = fopen("/sys/fs/cgroup/memory/rvisor/memory.limit_in_bytes","w")) == NULL) {
+        perror("openfile"); exit(0); }
+    fprintf(fp,"67108864");
+    fclose(fp);
+    if ((fp = fopen("/sys/fs/cgroup/memory/rvisor/memory.kmem.limit_in_bytes","w")) == NULL) {
+        perror("openfile"); exit(0); }
+    fprintf(fp,"67108864");
+    fclose(fp);
+    if ((fp = fopen("/sys/fs/cgroup/memory/rvisor/memory.swappiness","w")) == NULL) {
+        perror("openfile"); exit(0); }
+    fprintf(fp,"0");
+    fclose(fp);
+    if ((fp = fopen("/sys/fs/cgroup/memory/rvisor/cgroup.procs","w")) == NULL) {
+        perror("openfile"); exit(0); }
+    fprintf(fp,"%d",boot_pid);
+    fclose(fp);
+
     head = malloc(sizeof(struct pid_node));
     head->next = NULL;
     if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
@@ -276,12 +267,63 @@ int send_to_boot(char *message)
     return 0;
 }
 
-int execute(char *path){
+int execute(char **argv){
+    extern char **environ;
     pid_t pid;
+    FILE *fp;
     pid = fork();
     if(pid == 0){
-        sleep(1);
         char buffer[15];
+        char **envir = environ;
+        char *env_temp;
+        char env_name[128];
+        char *path = argv[0];
+        char *env_to_set[64];
+        int i, j = 0;
+
+        if ((fp = fopen("/sys/fs/cgroup/memory/rvisor/cgroup.procs","a")) == NULL) {
+        perror("openfile"); exit(0); }
+        fprintf(fp,"%d",getpid());
+        fclose(fp);
+
+
+        for(i = 1; argv[i]; i++){
+            if (strcmp(argv[i], "-env") == 0) {
+                if (argv[++i]) env_to_set[j++] = argv[i];
+                else {printf("missing envir after '-env'\n"); exit(0); }
+            }
+        }
+
+        /*clear envs*/
+        while (*envir) {
+            env_temp = *envir;
+            for(i = 0; *(env_temp + i) != '='; i++){
+                env_name[i] = *(env_temp + i);
+            }
+            env_name[i] = '\0';
+            unsetenv(env_name);
+            envir++;
+        }
+
+        for(j = 0; env_to_set[j]; j++){
+            i = putenv(env_to_set[j]);
+            if(i < 0) {printf("putenv"); exit(0);}
+        }
+
+        i = chdir("/");
+        if(i < 0) {perror("chdir"); exit(0);}
+        i = putenv("PWD=/");
+        if(i < 0) {perror("putenv"); exit(0);}
+        
+        system("env");
+
+//      system("pwd");
+
+        int fd = open("/dev/rvisor", O_RDWR);
+        if (fd == -1) perror("Execute, rvisor");
+        ioctl(fd, RVISOR_ADD_PROC, getpid());
+        close(fd);
+
         printf("son process = %d\n",getpid());
         sprintf(buffer,"%09d \n",getpid());
         send_to_boot(buffer);
@@ -289,22 +331,15 @@ int execute(char *path){
         args[0] = path;
         args[1] = NULL;
 
-        /* should use execvp(), but there's a bug*/
         sleep(0.5);
-        //system(path);
         execvp(args[0], args);
         perror("execvp");
         exit(0);
     }
     else{
         //printf("father process = %d\n",getpid());
-        int fd = open("/dev/rvisor", O_RDWR);
-        if (fd == -1) perror("Execute, rvisor");
-        ioctl(fd, RVISOR_ADD_PROC, pid);
-
         int i;
         wait(&i);
-        close(fd);
         exit(0);
     }
 }
@@ -329,11 +364,9 @@ int main(int argc, char **argv) {
         //send_to_boot("0\n");
         if (!argv[2]) {
             perror("Exec Error: expect guest path.");
-
-
         }
         else {
-            execute(argv[2]);
+            execute(argv + 2);
         }
     }
     if (strcmp(argv[1], "boot") == 0){
@@ -341,10 +374,10 @@ int main(int argc, char **argv) {
     }
     if (strcmp(argv[1], "ps") == 0){
         send_to_boot("ps\n");
-        sleep(1); //so that output won't be disturbed by shell
+        sleep(0.5); //so output won't be disturbed by shell
     } 
     if (strcmp(argv[1], "shutdown") == 0){
         send_to_boot("shutdown\n");
-        sleep(1);
+        sleep(0.5);
     }
 }

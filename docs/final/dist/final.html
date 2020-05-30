@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset=UTF-8><title>结题报告 - By dnailz</title><link rel=stylesheet href=//cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css><link rel=stylesheet href=//cdn.staticfile.org/prism/1.15.0/themes/prism.min.css><link rel=stylesheet href=//cdn.staticfile.org/KaTeX/0.10.0-rc.1/katex.min.css><link href=./css/chunk-vendors.4e4765ff.css rel=stylesheet></head><body><div><article id=webslides><section slide class="slide bg-black-blue aligncenter" image="https://source.unsplash.com/C1HhAQrbykQ/ .dark"><span class="background dark" style="background-image:url('https://source.unsplash.com/C1HhAQrbykQ/')"></span><div class=wrap wrap=true><h1 class="text-landing text-shadow">结题报告</h1><p class=text-intro>By dnailz</p><p><a href=https://github.com/ksky521/nodeppt class="button ghost" target=_blank><i class="fa fa-github"></i> Github</a></p></div></section></article></div><script src=//cdn.staticfile.org/echarts/4.1.0-release/echarts.min.js></script><script>window.pluginsOptions = {}
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    let isPrintMode = false;
+    if(~location.search.indexOf('print-pdf')){
+        isPrintMode = true;
+        WebSlides.registerPlugin('scroll', function(){});
+    }
+    const ws = new WebSlides({
+        loop: false
+    })
+    window.wsInstance = ws;
+    if(isPrintMode){
+        ws.slides.forEach(s=>s.show())
+    }
+}, false)</script><script src=./js/chunk-vendors.js></script><script src=./js/final.js></script></body></html>

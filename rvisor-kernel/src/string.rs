@@ -28,6 +28,7 @@ pub fn read_from_user(user_ptr : u64, max_length : usize) -> KernelResult<String
 }
 
 pub fn write_to_user(user_ptr : u64, max_length : usize, mut src : String) -> KernelResult<()> {
+    src.push(0 as char);
     let uptr = UserSlicePtr::new_ptr(user_ptr, max_length)?;
     uptr.write_all(src.as_bytes())?;
     Ok(())

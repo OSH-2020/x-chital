@@ -51,6 +51,11 @@ impl Container {
         self.runk_mut(|k| k.add_task(pid)).unwrap()
     }
     #[inline(always)]
+    pub fn clone_task(&mut self, pid : bindings::pid_t, fpid: bindings::pid_t) -> KernelResult<()> {
+        self.runk_mut(|k| k.clone_task(pid, fpid)).unwrap()
+    }
+
+    #[inline(always)]
     pub fn contains(&self, pid : bindings::pid_t) -> bool {
         self.runk(|k| k.contains(pid)).unwrap_or(false)
     }

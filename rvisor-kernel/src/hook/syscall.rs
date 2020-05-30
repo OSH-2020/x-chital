@@ -46,6 +46,7 @@ fn i32_syscall<F>(f : F) -> Option<i64>
 {
     let container = Container::get_container();
     if !container.try_set_current(get_pid()) {return None;}
+    info!("{}", get_pid());
     Some(return_result(
         container.runk_mut(f).unwrap()
     ))
@@ -89,6 +90,18 @@ kernel_syscall!(
 );
 
 kernel_syscall!(
+    orig_stat, safe_stat, rvisor_stat, {
+        |k| k.stat(filename, ptr)
+    }, filename, u64, ptr, u64
+);
+
+kernel_syscall!(
+    orig_lstat, safe_lstat, rvisor_lstat, {
+        |k| k.lstat(filename, ptr)
+    }, filename, u64, ptr, u64
+);
+
+kernel_syscall!(
     orig_getcwd, safe_getcwd, rvisor_getcwd, {
         |k| k.getcwd(buf, size)
     }, buf , u64, size, u64
@@ -122,30 +135,32 @@ macro_rules! normal_syscall{
 
 normal_syscall!(
     orig_clone, safe_clone, rvisor_clone, {
+        let fpid = get_pid();
         info!("clone: called inside container");
         let container = Container::get_container();
         let i = unsafe {orig_clone(flags, newsp, ptidptr, ctidptr, tls)};
-        if i > 0 {container.add_task(i as i32);}
+        if i > 0 {container.clone_task(i as i32, fpid);}
         i
     } , flags, u64, newsp, u64, ptidptr, u64, ctidptr, u64, tls, u64
 );
 
 normal_syscall!(
     orig_fork, safe_fork, rvisor_fork, {
+        let fpid = get_pid();
         info!("fork: called inside container");
         let container = Container::get_container();
         let i = unsafe {orig_fork()};
-        if i > 0 {container.add_task(i as i32);}
+        if i > 0 {container.clone_task(i as i32, fpid);}
         i
     },
 ); 
 
 normal_syscall!(
     orig_vfork, safe_vfork, rvisor_vfork, {
-        info!("vfork: called inside container");
+        let fpid = get_pid();
         let container = Container::get_container();
         let i = unsafe {orig_vfork()};
-        if i > 0 {container.add_task(i as i32);}
+        if i > 0 {container.clone_task(i as i32, fpid);}
         i
     },
 );

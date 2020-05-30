@@ -24,9 +24,11 @@
 //! the run `dmesg | tail -10`,  the result will be shown.
 //! 
 
+#![allow(dead_code)]
+#![allow(unused_imports)]
+
 #![no_std]
 extern crate alloc;
-#![no_std]
 extern crate spin;
 
 use linux_kernel_module;
