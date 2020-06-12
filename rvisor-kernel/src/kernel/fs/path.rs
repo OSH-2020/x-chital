@@ -10,6 +10,7 @@ use alloc::vec::Vec;
 
 use crate::kernel::Kernel;
 use crate::kernel::task::Task;
+use crate::kernel::fs::*;
 use crate::string;
 
 impl Task {
@@ -48,8 +49,13 @@ impl Task {
     }
 }
 
+pub enum Path {
+    Host(String),
+    Mapped(Arc<Mutex<DEntry>>),
+}
+
 impl Kernel {
-    pub fn guest_to_host(&self, guest_path : &String) -> KernelResult<String> {
+    pub fn guest_to_host(&self, guest_path : &String) -> KernelResult<Path> {
         if guest_path == "" {
             Err(Error::EINVAL)
         }
@@ -61,7 +67,7 @@ impl Kernel {
         }
     }
 
-    pub fn relative_to_absolute(&self, guest_path : &String) -> KernelResult<String>{
+    pub fn relative_to_absolute(&self, guest_path : &String) -> KernelResult<Path>{
         if let Some(ref cur) = self.current {
             let mut stack : Vec<&str> = Vec::with_capacity(20);
             let data = cur.lock();
@@ -74,7 +80,7 @@ impl Kernel {
         }
     }
 
-    fn path_convert(&self, guest_path : &String, relative : bool) -> KernelResult<String> {
+    fn path_convert(&self, guest_path : &String, relative : bool) -> KernelResult<Path> {
         let mut stack : Vec<&str> = Vec::with_capacity(20);
         if relative{
             if let Some(ref cur) = self.current {
@@ -89,6 +95,25 @@ impl Kernel {
             }
         } else {
             self.build_stack(guest_path, &mut stack)?;
+            let mut dentry = self.fs_map.get(stack[0]);
+            if let Some(dentry) = dentry {
+                let mut tmp = dentry.clone();
+                let mut iter = stack.iter();
+                iter.next();
+
+                let mut flag = true;
+                for name in iter {
+                    if let Some(ref next) = tmp.clone().lock().child.iter().find(|&x| { &&x.lock().name == name }) {
+                        tmp = (**next).clone();
+                    } else {
+                        flag = false;
+                        break;
+                    }
+                }
+                if flag {
+                    return Ok(Path::Mapped(tmp.clone()));
+                }
+            }
             self.guest_to_host_with_stack(&stack)
         }
     }
@@ -107,7 +132,7 @@ impl Kernel {
         }
         Ok(())
     }
-    fn guest_to_host_with_stack(&self, stack : &Vec<&str>) -> KernelResult<String> {
+    fn guest_to_host_with_stack(&self, stack : &Vec<&str>) -> KernelResult<Path> {
         let mut ret = String::with_capacity(80);
         ret.push_str(self.rootpath.as_str());
         for entry in stack {
@@ -115,6 +140,6 @@ impl Kernel {
             ret.push_str(entry);
         }
         info!("kernel path : {}", ret);
-        Ok(ret)
+        Ok(Path::Host(ret))
     }
 }

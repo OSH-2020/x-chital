@@ -7,6 +7,7 @@ use alloc::collections::btree_map::BTreeMap;
 use alloc::sync::Arc;
 use spin::Mutex;
 
+use crate::kernel::fs::*;
 pub const PATH_MAX : usize = 200;
 
 pub mod task;
@@ -14,7 +15,8 @@ use task::Task;
 
 pub struct Kernel {
     rootpath : String,
-    tasks : BTreeMap<i32, Arc<Mutex<Task>>>,
+    fs_map: BTreeMap<String,  Arc<Mutex<DEntry>> >,
+    tasks : BTreeMap<i32, Arc<Mutex<Task>> >,
     current : Option<Arc<Mutex<Task>>>,
 }
 
@@ -22,6 +24,7 @@ impl Kernel {
     pub fn new(host_path : String) -> KernelResult<Kernel> {
         Ok(Kernel{
             rootpath: host_path,
+            fs_map: BTreeMap::new(),
             tasks: BTreeMap::new(),
             current : None
         })
