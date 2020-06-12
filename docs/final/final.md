@@ -112,6 +112,7 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 ----
 
 ```rust
+#[derive(Debug, Clone)]
 pub struct INode {
     pub ino : u64,
     pub mode : u64,
