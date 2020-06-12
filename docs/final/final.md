@@ -46,3 +46,29 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 ```
 :::
 
+<slide :class="size-80">
+
+:::column {.vertical-align}
+### 使用 
+
+
+使用 `kallsyms_lookup_name` 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。
+
+由于 Linux 的内存保护机制，需要暂时禁止掉内存的写保护。
+
+----
+
+```c
+int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) { 
+    .......
+
+    cr0 = disable_wp(); // 关闭内存写保护
+    syscall_table[syscall_num] = syscall_fn; // 替换相应的系统调用
+    restore_wp(cr0); // 恢复内存写保护
+    
+    return 0;
+}
+```
+:::
+
+
