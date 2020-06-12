@@ -112,29 +112,22 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 ----
 
 ```rust
-    /// 对用户空间的iotcl调用做出反应
-    /// * create 命令新建一个容器环境
-    /// * addproc 增加一个进程
-    /// * remove 删除一个进程
-    fn ioctl(&self, cmd:u32, arg: u64) -> KernelResult<i64> {
-        info!("ioctl cmd={} arg={}", cmd, arg);
-        let mut container = Container::get_container();
-        let cmd = IoctlCmd::try_from(cmd)?;
-        match cmd {
-            IoctlCmd::Create => {
-                let path_str = string::read_from_user(arg, kernel::PATH_MAX)?;
-                container.init(path_str)?;
-                Ok(0)
-            }
-            IoctlCmd::AddProc => {
-                container.add_task(arg as i32)?;
-                Ok(0)
-            }
-            IoctlCmd::Remove => {
-                container.remove_task(arg as i32)?;
-                Ok(0)
-            }
-        }
-    }
+#[derive(Debug)]
+pub struct INode {
+    pub ino : u64,
+    pub mode : u64,
+    pub uid : u64,
+    pub gid : u64,
+}
+
+#[derive(Debug)]
+pub struct DEntry {
+    pub name : String,
+    pub inode : INode,
+    pub parent : Weak<Mutex<DEntry>>,
+    pub child : LinkedList<Arc<Mutex<DEntry>>>,
+    pub fops : Option<Rc<dyn FileOperations>>,
+}
+
 ```
 :::
