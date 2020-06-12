@@ -100,14 +100,15 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 <slide :class="size-80">
 
-:::column {.vertical-align}
 ### 模拟 Linux 虚拟文件系统
 # 
 #
 #
 #
+:::column {.vertical-align}
 
-
+```c
+```
 
 ----
 
