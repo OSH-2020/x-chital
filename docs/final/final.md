@@ -107,15 +107,7 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 #
 #
 
-实现内核与用户的交互的其他方式：系统调用方式（`seccomp`）、文件系统方式（`cgroup`）
 
-在系统中添加一个虚拟设备节点类型 `rvisor`，使用 `mknod` 创建节点后，可以通过 `ioctl` 系统调用进行交互。
-
-命令列表如下
-
-> * `create` 新建一个容器环境
-> * `addproc` 增加一个进程
-> * `remove` 删除一个进程
 
 ----
 
