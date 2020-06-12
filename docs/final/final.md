@@ -133,14 +133,9 @@ struct inode {
 
 struct dentry {
         atomic_t                 d_count;      
-        unsigned long            d_vfs_flags;  
         spinlock_t               d_lock;       
         struct inode             *d_inode;     
-        struct list_head         d_lru;        
         struct list_head         d_child;      
-        struct list_head         d_subdirs;    
-        struct list_head         d_alias;      
-        unsigned long            d_time;       
         struct dentry_operations *d_op;        
         struct rcu_head          d_rcu;        
         .....
