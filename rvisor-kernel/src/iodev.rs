@@ -62,15 +62,18 @@ impl fops::Ioctl for IoDeviceFile {
         let mut container = Container::get_container();
         let cmd = IoctlCmd::try_from(cmd)?;
         match cmd {
+            // create 命令新建一个容器环境
             IoctlCmd::Create => {
                 let path_str = string::read_from_user(arg, kernel::PATH_MAX)?;
                 container.init(path_str)?;
                 Ok(0)
             }
+            // addproc 增加一个进程
             IoctlCmd::AddProc => {
                 container.add_task(arg as i32)?;
                 Ok(0)
             }
+            // remove 删除一个进程
             IoctlCmd::Remove => {
                 container.remove_task(arg as i32)?;
                 Ok(0)
