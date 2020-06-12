@@ -123,9 +123,6 @@ struct inode {
         gid_t                   i_gid;
         kdev_t                  i_rdev;
         loff_t                  i_size;
-        struct timespec         i_atime;
-        struct timespec         i_mtime;
-        struct timespec         i_ctime;
         unsigned int            i_blkbits;
         unsigned long           i_blksize;
         spinlock_t              i_lock;
