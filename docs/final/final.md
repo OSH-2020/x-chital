@@ -51,6 +51,8 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 :::column {.vertical-align}
 ### 构造虚拟设备节点实现内核
+# 
+#
 
 
 使用 `kallsyms_lookup_name` 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。
