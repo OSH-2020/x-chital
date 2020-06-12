@@ -62,10 +62,10 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 ----
 
 ```rust
-/// 对用户空间的iotcl调用做出反应
-/// * create 命令新建一个容器环境
-/// * addproc 增加一个进程
-/// * remove 删除一个进程
+    /// 对用户空间的iotcl调用做出反应
+    /// * create 命令新建一个容器环境
+    /// * addproc 增加一个进程
+    /// * remove 删除一个进程
     fn ioctl(&self, cmd:u32, arg: u64) -> KernelResult<i64> {
         info!("ioctl cmd={} arg={}", cmd, arg);
         let mut container = Container::get_container();
