@@ -105,6 +105,10 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 #
 #
 #
+# 
+#
+#
+#
 :::column {.vertical-align}
 
 ```c
