@@ -125,11 +125,8 @@ struct dentry {
         struct list_head         d_alias;      
         unsigned long            d_time;       
         struct dentry_operations *d_op;        
-        struct super_block       *d_sb;        
-        unsigned int             d_flags;      
-        int                      d_mounted;    
-        void                     *d_fsdata;    
         struct rcu_head          d_rcu;        
+        .....
 };
 ```
 
@@ -148,8 +145,8 @@ pub struct INode {
 pub struct DEntry {
     pub name : String,
     pub inode : INode,
-    pub parent : Weak<Mutex<DEntry>>,
-    pub child : LinkedList<Arc<Mutex<DEntry>>>,
+    pub parent : Weak<RcuLock<DEntry>>,
+    pub child : LinkedList<Arc<RcuLock<DEntry>>>,
     pub fops : Option<Rc<dyn FileOperations>>,
 }
 
