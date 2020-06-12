@@ -17,8 +17,8 @@ By x-chital {.text-intro}
 ## 搭建 Rust + Linux 内核模块开发环境
 ---
 
-* 借助 fjw 助教提供的 VLab KVM 虚拟机共同开发。 {.animated.fadeInUp}
-*  {.animated.fadeInUp.delay-400}
+* 借助 fjw 助教提供的 VLab KVM 虚拟机远程共同开发。 {.animated.fadeInUp}
+* 使用 Github 项目 [linux-kernel-module-rust](https://github.com/fishinabarrel/linux-kernel-module-rust) 进行 LKM + Rust 开发   {.animated.fadeInUp.delay-400}
 *  {.animated.fadeInUp.delay-800}
 * Animation {.animated.fadeInUp.delay-1200}
 * Content Position {.animated.fadeInUp.delay-1600}
