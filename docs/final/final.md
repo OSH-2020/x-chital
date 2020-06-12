@@ -58,9 +58,9 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 在系统中添加一个虚拟设备节点类型 `rvisor`，使用 `mknod` 创建节点后，可以通过 `ioctl` 系统调用进行交互。
 
-* `create` 命令新建一个容器环境
-* `addproc` 增加一个进程
-* `remove` 删除一个进程
+    * `create` 新建一个容器环境
+    * `addproc` 增加一个进程
+    * `remove` 删除一个进程
 
 ----
 
