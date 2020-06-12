@@ -13,8 +13,6 @@ By x-chital {.text-intro}
 
 
 
-
-
 <slide :class="size-80">
 
 :::column {.vertical-align}
