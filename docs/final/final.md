@@ -124,7 +124,6 @@ struct inode {
         loff_t                  i_size;
         spinlock_t              i_lock;
         struct file_operations  *i_fop;
-        unsigned int            i_nlink;
         ......
 };
 
