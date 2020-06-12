@@ -12,6 +12,22 @@ By x-chital {.text-intro}
 [:fa-github: Github](https://github.com/OSH-2020/x-chital){.button.ghost}
 
 
+<slide class="bg-gradient-r" :class=" size-40 aligncenter" image="https://cn.bing.com/az/hprichbg/rb/WinterLynx_ZH-CN7158207296_1920x1080.jpg .dark">
+
+## 搭建 Rust + Linux 内核模块开发环境
+---
+
+* 借助付家伟 {.animated.fadeInUp}
+* CSS Syntax {.animated.fadeInUp.delay-400}
+* Background {.animated.fadeInUp.delay-800}
+* Animation {.animated.fadeInUp.delay-1200}
+* Content Position {.animated.fadeInUp.delay-1600}
+* Quotes {.animated.fadeInUp.delay-2s}
+* Plugins\: echarts/mermaid/ketax {.animated.fadeInUp.delay-2400}
+* Others\: Button/Table.. {.animated.fadeInUp.delay-2800}
+* Speaker mode.. {.animated.fadeInUp.delay-3200}
+
+
 <slide :class="size-80">
 
 :::column {.vertical-align}
