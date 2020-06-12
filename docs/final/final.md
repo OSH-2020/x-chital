@@ -9,14 +9,13 @@ plugins:
 
 By x-chital {.text-intro}
 
-[:fa-github: Github](https://github.com/ksky521/nodeppt){.button.ghost}
-
+[:fa-github: Github](https://github.com/OSH-2020/x-chital){.button.ghost}
 
 
 <slide :class="size-80">
 
 :::column {.vertical-align}
-### **系统调用替换的实现**
+### 系统调用替换的实现
 
 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。   {.text-intro}
 
