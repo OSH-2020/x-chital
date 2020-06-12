@@ -61,15 +61,33 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 ----
 
-```c
-int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) { 
-    .......
+```rust
+/// 对用户空间的iotcl调用做出反应
+/// * create 命令新建一个容器环境
+/// * addproc 增加一个进程
+/// * remove 删除一个进程
+impl fops::Ioctl for IoDeviceFile {
+    fn ioctl(&self, cmd:u32, arg: u64) -> KernelResult<i64> {
+        info!("ioctl cmd={} arg={}", cmd, arg);
+        let mut container = Container::get_container();
+        let cmd = IoctlCmd::try_from(cmd)?;
+        match cmd {
+            IoctlCmd::Create => {
+                let path_str = string::read_from_user(arg, kernel::PATH_MAX)?;
+                container.init(path_str)?;
+                Ok(0)
+            }
+            IoctlCmd::AddProc => {
+                container.add_task(arg as i32)?;
+                Ok(0)
+            }
+            IoctlCmd::Remove => {
+                container.remove_task(arg as i32)?;
+                Ok(0)
+            }
+        }
 
-    cr0 = disable_wp(); // 关闭内存写保护
-    syscall_table[syscall_num] = syscall_fn; // 替换相应的系统调用
-    restore_wp(cr0); // 恢复内存写保护
-    
-    return 0;
+    }
 }
 ```
 :::
