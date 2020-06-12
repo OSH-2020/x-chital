@@ -14,7 +14,7 @@ By x-chital {.text-intro}
 
 <slide :class="size-80">
 
-## 搭建 Rust + Linux 内核模块开发环境
+### 搭建 Rust + Linux 内核模块开发环境
 ---
 
 * 借助 fjw 助教提供的 VLab KVM 虚拟机远程共同开发。 {.animated.fadeInUp}
@@ -25,7 +25,7 @@ By x-chital {.text-intro}
 
 :::column {.vertical-align}
 ### 系统调用替换的实现
-
+---
 
 使用 `kallsyms_lookup_name` 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。
 
