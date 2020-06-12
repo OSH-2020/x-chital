@@ -178,7 +178,12 @@ pub struct DEntry {
 
 <slide :class="size-80">
 
+### 进程管理系统
+
+未完成
+
+<slide :class="size-80">
+
 ### proc 文件系统
 
 基于之前编写的虚拟文件系统，实现一个 proc 文件系统。增加对 `top` 指令的支持。可以查看当前真是的内核信息。
-
