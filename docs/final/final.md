@@ -54,10 +54,13 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 # 
 #
 
+实现内核与用户的交互：系统调用方式（`seccomp`）、文件系统方式（`cgroup`）
 
-使用 `kallsyms_lookup_name` 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。
+在系统中添加一个虚拟设备节点类型 `rvisor`，使用 `mknod` 创建节点后，可以通过 `ioctl` 系统调用进行交互。
 
-由于 Linux 的内存保护机制，需要暂时禁止掉内存的写保护。
+* `create` 命令新建一个容器环境
+* `addproc` 增加一个进程
+* `remove` 删除一个进程
 
 ----
 
