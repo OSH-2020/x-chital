@@ -50,7 +50,7 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 <slide :class="size-80">
 
 :::column {.vertical-align}
-### 构造虚拟设备节点实现内核
+### 构造虚拟设备节点实现内核与用户的交互
 # 
 #
 
