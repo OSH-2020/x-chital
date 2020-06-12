@@ -26,6 +26,7 @@ By x-chital {.text-intro}
 :::column {.vertical-align}
 ### 系统调用替换的实现
 
+
 使用 `kallsyms_lookup_name` 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。
 
 由于 Linux 的内存保护机制，需要暂时禁止掉内存的写保护。
