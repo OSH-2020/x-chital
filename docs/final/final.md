@@ -118,16 +118,13 @@ struct inode {
         unsigned long           i_ino;
         atomic_t                i_count;
         umode_t                 i_mode;
-        unsigned int            i_nlink;
         uid_t                   i_uid;
         gid_t                   i_gid;
         kdev_t                  i_rdev;
         loff_t                  i_size;
-        unsigned int            i_blkbits;
-        unsigned long           i_blksize;
         spinlock_t              i_lock;
-        struct inode_operations *i_op;
         struct file_operations  *i_fop;
+        unsigned int            i_nlink;
         ......
 };
 
