@@ -12,21 +12,14 @@ By x-chital {.text-intro}
 [:fa-github: Github](https://github.com/OSH-2020/x-chital){.button.ghost}
 
 
-<slide class="bg-gradient-r" :class=" size-40 aligncenter" image="https://cn.bing.com/az/hprichbg/rb/WinterLynx_ZH-CN7158207296_1920x1080.jpg .dark">
+<slide :class="size-80">
 
 ## 搭建 Rust + Linux 内核模块开发环境
 ---
 
 * 借助 fjw 助教提供的 VLab KVM 虚拟机远程共同开发。 {.animated.fadeInUp}
 * 使用 Github 项目 [linux-kernel-module-rust](https://github.com/fishinabarrel/linux-kernel-module-rust) 进行 LKM + Rust 开发   {.animated.fadeInUp.delay-400}
-*  {.animated.fadeInUp.delay-800}
-* Animation {.animated.fadeInUp.delay-1200}
-* Content Position {.animated.fadeInUp.delay-1600}
-* Quotes {.animated.fadeInUp.delay-2s}
-* Plugins\: echarts/mermaid/ketax {.animated.fadeInUp.delay-2400}
-* Others\: Button/Table.. {.animated.fadeInUp.delay-2800}
-* Speaker mode.. {.animated.fadeInUp.delay-3200}
-
+* 借助 RLS（Rust Language Server）搭建开发环境 {.animated.fadeInUp.delay-800}
 
 <slide :class="size-80">
 
