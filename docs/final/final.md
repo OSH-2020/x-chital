@@ -112,7 +112,6 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 ----
 
 ```rust
-#[derive(Debug)]
 pub struct INode {
     pub ino : u64,
     pub mode : u64,
@@ -120,7 +119,7 @@ pub struct INode {
     pub gid : u64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DEntry {
     pub name : String,
     pub inode : INode,
