@@ -105,8 +105,7 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 * 原子操作：rust 的引用计数智能指针 `Arc` 提供的相关操作是原子的，故可以直接使用。
 * 自旋锁、自旋读写锁： rust no_std 本身没有提供，但是可以通过外部库来实现（这个库本身使用不到任何内核模块相关的东西，可以放心使用）。
-* Rcu 锁：
-
+* Rcu 锁：这个使用内核的 Rcu 锁，并封装成一个 Rust 的 struct 为 `RcuLock`。
 
 <slide :class="size-80">
 
@@ -167,7 +166,10 @@ pub struct DEntry {
     pub child : LinkedList<Arc<RcuLock<DEntry>>>,
     pub fops : Option<Rc<dyn FileOperations>>,
 }
-
 ```
 :::
 
+
+<slide :class="size-80">
+
+### 文件系统的读写
