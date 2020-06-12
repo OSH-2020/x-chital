@@ -27,6 +27,8 @@ By x-chital {.text-intro}
 ### 系统调用替换的实现
 # 
 #
+#
+#
 
 使用 `kallsyms_lookup_name` 得到系统调用表后，编写一个简单的 C-Shim, 实现对系统调用的替换。
 
@@ -52,6 +54,8 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 :::column {.vertical-align}
 ### 实现内核与用户的交互
 # 
+#
+#
 #
 
 实现内核与用户的交互的其他方式：系统调用方式（`seccomp`）、文件系统方式（`cgroup`）
@@ -94,4 +98,51 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 ```
 :::
 
+<slide :class="size-80">
 
+:::column {.vertical-align}
+### 模拟 Linux 虚拟文件系统
+# 
+#
+#
+#
+
+实现内核与用户的交互的其他方式：系统调用方式（`seccomp`）、文件系统方式（`cgroup`）
+
+在系统中添加一个虚拟设备节点类型 `rvisor`，使用 `mknod` 创建节点后，可以通过 `ioctl` 系统调用进行交互。
+
+命令列表如下
+
+> * `create` 新建一个容器环境
+> * `addproc` 增加一个进程
+> * `remove` 删除一个进程
+
+----
+
+```rust
+    /// 对用户空间的iotcl调用做出反应
+    /// * create 命令新建一个容器环境
+    /// * addproc 增加一个进程
+    /// * remove 删除一个进程
+    fn ioctl(&self, cmd:u32, arg: u64) -> KernelResult<i64> {
+        info!("ioctl cmd={} arg={}", cmd, arg);
+        let mut container = Container::get_container();
+        let cmd = IoctlCmd::try_from(cmd)?;
+        match cmd {
+            IoctlCmd::Create => {
+                let path_str = string::read_from_user(arg, kernel::PATH_MAX)?;
+                container.init(path_str)?;
+                Ok(0)
+            }
+            IoctlCmd::AddProc => {
+                container.add_task(arg as i32)?;
+                Ok(0)
+            }
+            IoctlCmd::Remove => {
+                container.remove_task(arg as i32)?;
+                Ok(0)
+            }
+        }
+    }
+```
+:::
