@@ -17,9 +17,9 @@ By x-chital {.text-intro}
 ## 搭建 Rust + Linux 内核模块开发环境
 ---
 
-* 借助付家伟 {.animated.fadeInUp}
-* CSS Syntax {.animated.fadeInUp.delay-400}
-* Background {.animated.fadeInUp.delay-800}
+* 借助 fjw 助教提供的 VLab KVM 虚拟机共同开发。 {.animated.fadeInUp}
+*  {.animated.fadeInUp.delay-400}
+*  {.animated.fadeInUp.delay-800}
 * Animation {.animated.fadeInUp.delay-1200}
 * Content Position {.animated.fadeInUp.delay-1600}
 * Quotes {.animated.fadeInUp.delay-2s}
