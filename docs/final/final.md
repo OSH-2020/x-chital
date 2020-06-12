@@ -100,6 +100,16 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 <slide :class="size-80">
 
+### 在 Rust 中实现内核同步
+---
+
+* 自旋锁、自旋读写锁： rust no_std 本身没有提供，但是可以通过外部库来实现（这个库本身使用不到任何内核模块相关的东西，可以放心使用）
+* 
+*  
+
+
+<slide :class="size-80">
+
 ### 模拟 Linux 虚拟文件系统
 # 
 #
