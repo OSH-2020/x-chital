@@ -1,6 +1,6 @@
-[submodule "containerd-rvisor"]
-	path = containerd-rvisor
-	url = https://github.com/OSH-2020/containerd-rvisor.git
 [submodule "rvisor-kernel"]
 	path = rvisor-kernel
 	url = https://github.com/DnailZ/rvisor-kernel.git
+[submodule "containerd-rvisor"]
+	path = containerd-rvisor
+	url = https://github.com/OSH-2020/containerd-rvisor.git
