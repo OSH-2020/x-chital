@@ -31,7 +31,7 @@ Socket can only handle limited numbers of instructions.(100 instructions)
 
 
 
-int boot_pid;  // for `shutdown` to kill the boot.(required or not?)
+int boot_pid;
 
 struct pid_node{
     int pid;
@@ -271,6 +271,7 @@ int execute(char **argv){
     extern char **environ;
     pid_t pid;
     FILE *fp;
+    int background = 0;
     pid = fork();
     if(pid == 0){
         char buffer[15];
@@ -293,6 +294,8 @@ int execute(char **argv){
                 else {printf("missing envir after '-env'\n"); exit(0); }
             }
         }
+        
+        if (strcmp(argv[i-1], "&") == 0) background = 1;
 
         /*clear envs*/
         while (*envir) {
@@ -315,7 +318,7 @@ int execute(char **argv){
         i = putenv("PWD=/");
         if(i < 0) {perror("putenv"); exit(0);}
         
-        system("env");
+//      system("env");
 
 //      system("pwd");
 
@@ -336,20 +339,35 @@ int execute(char **argv){
         perror("execvp");
         exit(0);
     }
-    else{
-        //printf("father process = %d\n",getpid());
-        int i;
-        wait(&i);
+    else {
+        if (!background){
+            //printf("father process = %d\n",getpid());
+            int i;
+            wait(&i);
+        }
         exit(0);
     }
+}
+
+void print_usage(){
+    printf("Runrsc Usage:\n");
+    printf("    ./runrsc [command]\n\n");
+    printf("To create a container: \n\t./runrsc create [path]\n");
+    printf("To print process status info: \n\t./runrsc ps\n");
+    printf("To shutdown all processes and the container itself: \n\t./runrsc shutdown\n");
+    printf("To start a process in the container: \n\t./runrsc exec [path][option]\n");
+    printf("\toption: -env [name=value]\n");
 }
 
 
 int main(int argc, char **argv) {
     pid_t pid;
 
-    //TODO if argc==0 usage
-
+    //TODO if argc==1 usage
+    if (argc < 2){
+        print_usage();
+        return 0;
+    }
     if (strcmp(argv[1], "create") == 0){
         if (!argv[2]) {
             perror("Create Error: expect root path.");
@@ -360,7 +378,7 @@ int main(int argc, char **argv) {
         boot();
         else exit(0);
     }
-    if (strcmp(argv[1], "exec") == 0) {
+    else if (strcmp(argv[1], "exec") == 0) {
         //send_to_boot("0\n");
         if (!argv[2]) {
             perror("Exec Error: expect guest path.");
@@ -369,15 +387,13 @@ int main(int argc, char **argv) {
             execute(argv + 2);
         }
     }
-    if (strcmp(argv[1], "boot") == 0){
-        boot();
-    }
-    if (strcmp(argv[1], "ps") == 0){
+    else if (strcmp(argv[1], "ps") == 0){
         send_to_boot("ps\n");
-        sleep(0.5); //so output won't be disturbed by shell
+        sleep(1); //so output won't be disturbed by shell
     } 
-    if (strcmp(argv[1], "shutdown") == 0){
+    else if (strcmp(argv[1], "shutdown") == 0){
         send_to_boot("shutdown\n");
-        sleep(0.5);
+        sleep(1);
     }
+    else print_usage();
 }

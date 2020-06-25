@@ -1,0 +1,3 @@
+[submodule "containerd-rvisor"]
+	path = containerd-rvisor
+	url = https://github.com/OSH-2020/containerd-rvisor.git

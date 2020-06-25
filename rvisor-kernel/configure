@@ -1,8 +1,0 @@
-#! /bin/bash
-result=$(clang -v | grep "clang version 9")
-
-if [[ "$result" == "" ]]
-then 
-    sudo apt install -y clang-9
-    sudo cp $(which clang-9) $(which clang)
-fi
