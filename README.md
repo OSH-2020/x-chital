@@ -14,3 +14,5 @@
 ## 文档
 
 推荐阅读 Notion 文档 [Notion](https://www.notion.so/oshchital/RVisor-Developing-Wiki-d3f127a7d0f0405f8486f74e5ce29987)
+
+结题ppt可在 [Github-Page](https://osh-2020.github.io/x-chital/final/dist/final.html#slide=1) 上查看。
