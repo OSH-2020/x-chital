@@ -119,7 +119,7 @@ int create(char *path){
     system("dmesg --clear");
     system("rmmod rvisor");    // RESPOSE: your syntax error!
     //  problem with 'rmmod'.
-    int suc = system("insmod /home/share/x-chital/rvisor-kernel/rvisor.ko");
+    int suc = system("insmod /home/share/orig-rvisor-kernel/rvisor.ko");
     if(suc != 0) { printf("insmod failed!\n"); exit(1);}
 
     system("mknod --mode=a=rw /dev/rvisor c $(cat /proc/devices | grep rvisor | awk '{print $1}') 0");
