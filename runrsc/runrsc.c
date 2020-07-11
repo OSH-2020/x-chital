@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 
-#define PORT 12290
+#define PORT 13393
 #define RVISOR_CREATE 0
 #define RVISOR_ADD_PROC 1
 #define RVISOR_REMOVE_PROC 2
@@ -40,15 +40,14 @@ struct pid_node{
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int pid_alive(int pid){
-    //Just a trick, may be better way 
     //if pid is alive, return 1
     //else return 0
     char cmd[64];
     char result[32];
     FILE * fp;
-    sprintf(cmd, "ps -p %d | wc", pid); //if already killed, only title will be outputed be `ps`, otherwise there will be 2 lines.
+    sprintf(cmd, "ps -p %d 2>/dev/null | wc ", pid); //if already killed, only title will be outputed be `ps`, otherwise there will be 2 lines.
     if ((fp = popen(cmd, "r") ) == NULL){
-        printf("Popen Error!\n");
+        printf("[Err] Popen Error!\n");
 		return -1;
 	}
     memset(result, 0, 32);
@@ -61,9 +60,9 @@ int pid_info(char *result,int pid){
     // Get the second line of the result of `ps`(the first line is the titie)
     char cmd[64];
     FILE * fp;
-    sprintf(cmd, "ps -p %d", pid);
+    sprintf(cmd, "ps -p %d 2>/dev/null", pid);
     if ((fp = popen(cmd, "r") ) == NULL){
-        printf("Popen Error!\n");
+        printf("[ERR] Popen Error!\n");
 		return -1;
 	}
     memset(result, 0, 64);
@@ -101,7 +100,7 @@ int killall(){
             sprintf(cmd, "kill -9 %d", pid);
             //printf("cmd:%s\n",cmd);
             system(cmd);
-            printf("%d has been killed.\n",pid);
+            printf("[INFO] %d has been killed.\n",pid);
         }
     }
     temp = head->next;
@@ -117,10 +116,9 @@ int killall(){
 
 int create(char *path){
     system("dmesg --clear");
-    system("rmmod rvisor");    // RESPOSE: your syntax error!
-    //  problem with 'rmmod'.
-    int suc = system("insmod /home/share/orig-rvisor-kernel/rvisor.ko");
-    if(suc != 0) { printf("insmod failed!\n"); exit(1);}
+    system("rmmod rvisor");  
+    int suc = system("insmod /home/share/rvisor-kernel/kernel-loader/rvisor.ko");
+    if(suc != 0) { printf("[ERR] insmod failed!\n"); exit(1);}
 
     system("mknod --mode=a=rw /dev/rvisor c $(cat /proc/devices | grep rvisor | awk '{print $1}') 0");
     int fd = open("/dev/rvisor", O_RDWR);
@@ -142,19 +140,18 @@ void *handler(void *data){
     char buffer[15];
     //printf("%d handler!\n",*client_id);
     read(*client_id, buffer, 15);
-    //printf("read success.\n");
     if (buffer[0] == 'p'){
-        printf("ps!\n");
+        //printf("ps\n");
         ps();
     }
     else if (buffer[0] == 's'){
-        printf("shutdown!\n");
+        //printf("shutdown!\n");
         killall();
     }
     else {
         int pid;
         pid = atoi(buffer);
-        printf("pid = %d\n",pid);
+        //printf("[INFO] exit pid = %d\n",pid);
         struct pid_node *temp;
         temp = malloc(sizeof(struct pid_node));
         pthread_mutex_lock(&mutex);
@@ -177,7 +174,6 @@ int boot(){
     int fd_clients[100];
     struct Node *temp;
     int fd, fd_temp;
-    printf("boot!\n");
     boot_pid = getpid();
     FILE *fp;
 
@@ -220,13 +216,13 @@ int boot(){
         perror("listen");
         return 1;
     }
-    printf("boot ready to accept\n");
+    printf("[INFO] boot ready to accept\n");
 
     i = 0;
     while(1){
         while (client_num < 100){
             if ((fd_temp = accept(fd, NULL, NULL)) != -1) {
-                printf("%d connected.\n",fd_temp);
+                printf("[INFO] Command Recieved.\n");
                 fd_clients[i] = fd_temp;
                 pthread_create(&thread[i], NULL, handler, (void *)&fd_clients[i]); //Create a thread to handle it
                 pthread_detach(thread[i]); 
@@ -244,7 +240,7 @@ int boot(){
 
 
 int send_to_boot(char *message)
-{
+{   
     //printf("send_to_boot!\n");
     int fd = socket(AF_INET, SOCK_STREAM, 0);    
     if (fd == -1) {
@@ -262,7 +258,6 @@ int send_to_boot(char *message)
     }
     //printf("client:%d connect.\n",fd);
     write(fd, message, 15);
-    //printf("write success.\n");
     close(fd);
     return 0;
 }
@@ -281,6 +276,7 @@ int execute(char **argv){
         char *path = argv[0];
         char *env_to_set[64];
         int i, j = 0;
+        int son_pid;
 
         if ((fp = fopen("/sys/fs/cgroup/memory/rvisor/cgroup.procs","a")) == NULL) {
         perror("openfile"); exit(0); }
@@ -291,7 +287,7 @@ int execute(char **argv){
         for(i = 1; argv[i]; i++){
             if (strcmp(argv[i], "-env") == 0) {
                 if (argv[++i]) env_to_set[j++] = argv[i];
-                else {printf("missing envir after '-env'\n"); exit(0); }
+                else {printf("[ERR] missing envir after '-env'\n"); exit(0); }
             }
         }
         
@@ -310,7 +306,7 @@ int execute(char **argv){
 
         for(j = 0; env_to_set[j]; j++){
             i = putenv(env_to_set[j]);
-            if(i < 0) {printf("putenv"); exit(0);}
+            if(i < 0) {printf("[ERR] putenv\n"); exit(0);}
         }
 
         i = chdir("/");
@@ -318,23 +314,22 @@ int execute(char **argv){
         i = putenv("PWD=/");
         if(i < 0) {perror("putenv"); exit(0);}
         
-//      system("env");
+        son_pid = getpid();
+        printf("[INFO] son process = %d\n",son_pid);
 
-//      system("pwd");
+        sprintf(buffer,"%09d\n",son_pid);
+        //printf("%s\n",buffer);
+        send_to_boot(buffer);
 
         int fd = open("/dev/rvisor", O_RDWR);
         if (fd == -1) perror("Execute, rvisor");
-        ioctl(fd, RVISOR_ADD_PROC, getpid());
+        ioctl(fd, RVISOR_ADD_PROC, son_pid);
         close(fd);
 
-        printf("son process = %d\n",getpid());
-        sprintf(buffer,"%09d \n",getpid());
-        send_to_boot(buffer);
         char *args[2]; 
         args[0] = path;
         args[1] = NULL;
 
-        sleep(0.5);
         execvp(args[0], args);
         perror("execvp");
         exit(0);
@@ -345,6 +340,7 @@ int execute(char **argv){
             int i;
             wait(&i);
         }
+        else sleep(0.5);
         exit(0);
     }
 }
