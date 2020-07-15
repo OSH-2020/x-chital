@@ -64,9 +64,9 @@ int replace_syscall(unsigned int syscall_num, long (*syscall_fn)(void)) {
 
 命令列表如下
 
-> * `create` 新建一个容器环境
-> * `addproc` 增加一个进程
-> * `remove` 删除一个进程
+* `create` 新建一个容器环境，并返回容器id
+* `addself` 增加一个进程
+* `remove` 删除一个进程
 
 ----
 

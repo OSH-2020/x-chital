@@ -1,6 +1,5 @@
 
-all: getdesh
-	make -C ../rvisor-kernel
+all:
 	gcc -static -pthread runrsc.c -o runrsc
 
 getdesh:

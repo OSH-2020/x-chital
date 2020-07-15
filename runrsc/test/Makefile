@@ -1,3 +1,4 @@
 
 all:
-	gcc -static hello.c -o hello
+	g++ -static hello.cpp -o hello
+	cp ./hello ../alpine/bin/sh
