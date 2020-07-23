@@ -238,11 +238,13 @@ runrSC 的与内核的具体接口如下：
 
 #### 3.3.2 containerd-shim
 
-containerd-shim 为 runrsc 提供  containerd 接口，使得 rVisor 可以运行由 containerd 提供的各种容器。containerd-shim 通过 gRPC 与 containerd 交互，遵循 containerd-shim v1 标准。这一部分由叶之帆同学完成
+containerd-shim 为 runrsc 提供  containerd 接口，使得 rVisor 可以运行由 containerd 提供的各种容器，并且使得 kubernetes 等工具有能力通过 containerd 使用 rVisor 容器运行时。containerd-shim 通过 ttRPC （ ttRPC 是一个轻量级的RPC协议 ）与 containerd 交互，遵循 containerd-shim v2 标准。这一部分由叶之帆同学完成
 
-下图为 rvisor-shim 支持的所有 gRPC 远程调用。
+下图为 rvisor-shim 支持的所有 ttRPC 远程调用：
 
 ![](assets/containerd.png)
+
+对于没有 containerd-shim v2 已定义但未实现的 ttRPC 远程调用，按规范返回 ErrNotImplement 错误。
 
 ## 4 rVisor 实现效果和演示
 
