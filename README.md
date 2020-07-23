@@ -13,6 +13,7 @@
 
 ## 文档
 
+<<<<<<< HEAD
 [团队 Notion](https://www.notion.so/oshchital/RVisor-Developing-Wiki-d3f127a7d0f0405f8486f74e5ce29987)
 
 报告和讨论见 `discuss` 和 `docs`
@@ -20,3 +21,6 @@
 ## 代码
 
 本项目代码由 `runrsc`、 `containerd-rvisor` 和 `rvisor-kernel` 组成，可以到相关 submodule 里面查看。
+=======
+待补充
+>>>>>>> 8a9d94ac054d84211306ba889f05cde04a2740ed
