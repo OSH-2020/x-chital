@@ -2,7 +2,7 @@
 
 本报告中所谈及的具体细节可以参考： [Notion](https://www.notion.so/oshchital/RVisor-Developing-Wiki-d3f127a7d0f0405f8486f74e5ce29987)
 
-为获得更好的阅读体验，可以通过下载 [pdf](https://github.com/OSH-2020/x-chital/blob/master/docs/conclusion/conclusion-report.pdf) 阅读。
+为获得更好的阅读体验，可以通过下载 [pdf](https://github.com/OSH-2020/x-chital/blob/master/docs/conclusion/conclusion.md.pdf) 阅读。
 
 - [结题报告](#结题报告)
   * [1 项目简介](#1-项目简介)
